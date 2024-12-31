@@ -28,11 +28,11 @@ const EditProduct = () => {
     const allBrands = brand.all
 
     useEffect(() => {
-        if (id && !productDetail) {
+        if (id) {
             const promise = dispatch(getProductDetail(Number(id)))
             return () => promise.abort()
         }
-    }, [id, productDetail])
+    }, [id])
 
     useEffect(() =>{
         if (editedProduct){

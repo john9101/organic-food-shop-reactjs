@@ -125,14 +125,6 @@ function App() {
                         {
                             path: '',
                             element: <CategoryManagement/>
-                        },
-                        {
-                            path: "add",
-                            element: <AddProduct/>
-                        },
-                        {
-                            path: "edit/:id",
-                            element: <EditProduct/>
                         }
                     ]
                 }

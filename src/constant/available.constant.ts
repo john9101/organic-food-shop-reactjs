@@ -70,3 +70,14 @@ export const availableMeasurementUnits = [
         name: 'ML'
     }
 ]
+
+export const availableGenders = [
+    {
+        title: 'Nam',
+        name: 'MALE'
+    },
+    {
+        title: 'Nữ',
+        name: 'FEMALE'
+    }
+]

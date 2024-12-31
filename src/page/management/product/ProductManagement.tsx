@@ -13,13 +13,15 @@ import {Button} from "@/components/ui/button.tsx";
 import {MoreHorizontal} from "lucide-react";
 import {ProductDetailDialog} from "@/components/management/product/ProductDetailDialog.tsx";
 import {Link} from "react-router-dom";
+import {ProductDeleteDialog} from "@/components/management/product/ProductDeleteDialog.tsx";
 
 const ProductManagement = () => {
     const dispatch = useAppDispatch();
     const {product} = useAppSelector(state => state.product);
     const allProducts = product.all
     const [openProductDetailDialog, setOpenProductDetailDialog] = useState<boolean>(false);
-    const [selectedId, setSelectedId] = useState<number | number[] | null>(null);
+    const [openProductDeleteDialog, setOpenProductDeleteDialog] = useState<boolean>(false);
+    const [selectedId, setSelectedId] = useState<number | null>(null);
 
     useEffect(() => {
         if (!allProducts) {
@@ -28,8 +30,13 @@ const ProductManagement = () => {
         }
     },[allProducts])
 
-    const handleViewProductDetail = (id: number) => {
+    const handleShowProductDetail = (id: number) => {
         setOpenProductDetailDialog(true);
+        setSelectedId(id)
+    };
+
+    const handleShowProductDelete = (id: number) => {
+        setOpenProductDeleteDialog(true);
         setSelectedId(id)
     };
 
@@ -53,11 +60,11 @@ const ProductManagement = () => {
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
                                             <DropdownMenuLabel>Danh sách thao tác</DropdownMenuLabel>
-                                            <DropdownMenuItem onClick={() => handleViewProductDetail(product.id)}>Xem chi tiết</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleShowProductDetail(product.id)}>Xem chi tiết</DropdownMenuItem>
                                             <DropdownMenuItem asChild className="text-neutral-700">
                                                 <Link to={`edit/${product.id}`}>Chỉnh sửa</Link>
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem>Xóa</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleShowProductDelete(product.id)}>Xóa</DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </>
@@ -68,6 +75,7 @@ const ProductManagement = () => {
                 data={allProducts?.items ? allProducts.items : []}
             />
             <ProductDetailDialog open={openProductDetailDialog} onOpenChange={setOpenProductDetailDialog} id={selectedId as number} />
+            <ProductDeleteDialog open={openProductDeleteDialog} onOpenChange={setOpenProductDeleteDialog} id={selectedId as number} />
         </div>
     )
 }

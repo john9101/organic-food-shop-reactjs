@@ -23,7 +23,7 @@ const CategoryManagement = () => {
     const allCategories = category.all
     const [openCategoryDetailDialog, setOpenCategoryDetailDialog] = useState<boolean>(false);
     const [openCategoryEditDialog, setOpenCategoryEditDialog] = useState<boolean>(false);
-    const [selectedId, setSelectedId] = useState<number | number[] | null>(null);
+    const [selectedId, setSelectedId] = useState<number | null>(null);
 
     useEffect(() => {
         if (!allProducts) {

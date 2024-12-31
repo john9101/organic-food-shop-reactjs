@@ -1,7 +1,7 @@
 import {SuccessApiResponse} from "@/type/response/api.type.ts";
 import instance from "@/util/http.ts";
 import {
-    AddedProductResponse,
+    AddedProductResponse, DeletedProductResponse, EditedProductResponse,
     GotAllProductsResponse,
     GotProductDetailResponse
 } from "@/type/response/product.response.ts";
@@ -25,8 +25,13 @@ const productApi = {
         });
     },
     editProduct: (id: number, body: AddProductRequest, thunkAPI: {signal :AbortSignal}) => {
-        return instance.patch<SuccessApiResponse<AddedProductResponse>>(`/products/${id}`, body, {
+        return instance.patch<SuccessApiResponse<EditedProductResponse>>(`/products/${id}`, body, {
             headers: { "Content-Type": "multipart/form-data" },
+            signal: thunkAPI.signal
+        });
+    },
+    deleteProduct: (id: number, thunkAPI: {signal :AbortSignal}) => {
+        return instance.delete<SuccessApiResponse<DeletedProductResponse>>(`/products/${id}`, {
             signal: thunkAPI.signal
         });
     }

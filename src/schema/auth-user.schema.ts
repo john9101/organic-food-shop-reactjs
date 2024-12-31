@@ -11,15 +11,14 @@ const authUserSchema = yup.object().shape({
     confirmPassword: yup.string()
         .oneOf([yup.ref("password")], "Mật khẩu nhập lại không trùng khớp")
         .required("Mật khẩu nhập lại không được bỏ trống"),
-    age: yup.number().positive("Tuổi không hợp lệ"),
     gender: yup.string(),
     dob: yup.date(),
     addresses: yup.array().of(
         yup.object().shape({
             specificPlace: yup.string().required("Địa chỉ không được bỏ trống"),
-            province: yup.string(),
-            district: yup.string(),
-            commune: yup.string(),
+            province: yup.string().required("Tỉnh/Thành phố không được bỏ trống"),
+            district: yup.string().required("Quận/Huyện không được bỏ trống"),
+            commune: yup.string().required("Phường/Xã không được bỏ trống"),
         })
     )
 })

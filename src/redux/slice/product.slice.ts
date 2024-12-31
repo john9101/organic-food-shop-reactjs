@@ -1,5 +1,5 @@
 import {
-    AddedProductResponse,
+    AddedProductResponse, DeletedProductResponse,
     EditedProductResponse,
     GotAllProductsResponse,
     GotProductDetailResponse
@@ -15,6 +15,7 @@ interface IState {
         all: GotAllProductsResponse | null
         added: AddedProductResponse | null
         edited: EditedProductResponse | null
+        deleted: DeletedProductResponse | null
     }
 }
 
@@ -25,6 +26,7 @@ const initialState: IState = {
         all: null,
         added: null,
         edited: null,
+        deleted: null
     }
 }
 
@@ -56,6 +58,13 @@ export const editProduct = createAsyncThunk<EditedProductResponse, { body: EditP
     }
 );
 
+export const deleteProduct = createAsyncThunk<DeletedProductResponse, number>(
+    'product/deleteProduct', async (id: number,thunkAPI) => {
+        const response = await productApi.deleteProduct(id, thunkAPI);
+        return thunkAPI.fulfillWithValue(response.data.data);
+    }
+);
+
 const productSlice = createSlice({
     name: 'product',
     initialState,
@@ -67,6 +76,10 @@ const productSlice = createSlice({
         resetEditedProduct: (state) => {
             state.isLoading = false
             state.product.edited = null
+        },
+        resetDeletedProduct: (state) => {
+            state.isLoading = false
+            state.product.deleted = null
         }
     },
     extraReducers: (builder) => {
@@ -137,8 +150,25 @@ const productSlice = createSlice({
                 state.isLoading = false
             }
         })
+
+        builder.addCase(deleteProduct.pending, (state, action) => {
+            if (action.payload){
+                state.isLoading = true
+            }
+        })
+        builder.addCase(deleteProduct.fulfilled, (state, action) => {
+            if(action.payload){
+                state.isLoading = false
+                state.product.deleted = action.payload
+            }
+        })
+        builder.addCase(deleteProduct.rejected, (state, action) => {
+            if (action.payload){
+                state.isLoading = false
+            }
+        })
     }
 })
 
-export const {resetAddedProduct, resetEditedProduct} = productSlice.actions;
+export const {resetAddedProduct, resetEditedProduct, resetDeletedProduct} = productSlice.actions;
 export default productSlice.reducer;

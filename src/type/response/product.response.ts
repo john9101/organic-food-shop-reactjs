@@ -44,3 +44,7 @@ export type EditedProductResponse = {
     brand_name: string
     category_name: string
 }
+
+export type DeletedProductResponse = {
+    id: number
+}
