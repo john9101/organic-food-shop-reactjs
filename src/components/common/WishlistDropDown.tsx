@@ -9,7 +9,7 @@ const WishlistDropDown = ()=>{
                 {() => (
                     <>
                         <Popover.Button className="rounded-full right-0 p-0 flex items-center justify-center focus:outline-none relative">
-                            <HeartIcon className="w-8 h-8 text-black"/>
+                            <HeartIcon className="w-10 h-10 stroke-1"/>
                         </Popover.Button>
                         <Transition
                             as={Fragment}

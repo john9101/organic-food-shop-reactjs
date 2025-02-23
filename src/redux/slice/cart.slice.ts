@@ -1,4 +1,4 @@
-import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import cartApi from "@/api/cart.api.ts";
 import {
     AddedItemToCartResponse,
@@ -8,24 +8,25 @@ import {
 import {AddItemToCartRequest, ChangeQuantityOfItemInCartRequest} from "@/type/request/cart.request.ts";
 import {isAxiosUnauthorizedError} from "@/util/axios.util.ts";
 import {ErrorField, FailureApiResponse} from "@/type/response/api.type.ts";
-import React from "react";
-import {toast} from "sonner";
-import {formatCurrency} from "@/util/decoration.util.ts";
 
 interface IState {
     isLoading: boolean
     cart: {
         summary: GotCartSummaryResponse | null
+        item: {
+            added: AddedItemToCartResponse | null
+        }
     };
-    error: ErrorField[] | null;
 }
 
 const initialState: IState = {
     isLoading: true,
     cart: {
-        summary: null
-    },
-    error: null,
+        summary: null,
+        item: {
+            added: null
+        }
+    }
 }
 
 export const getCartSummary = createAsyncThunk<GotCartSummaryResponse>(
@@ -35,19 +36,10 @@ export const getCartSummary = createAsyncThunk<GotCartSummaryResponse>(
     }
 );
 
-export const addItemToCart = createAsyncThunk<AddedItemToCartResponse, AddItemToCartRequest, {
-    rejectValue: ErrorField[]
-}>(
+export const addItemToCart = createAsyncThunk<AddedItemToCartResponse, AddItemToCartRequest>(
     'cart/addItemToCart', async (body, thunkAPI) => {
-        try {
-            const response = await cartApi.addItemToCart(body, thunkAPI);
-            return thunkAPI.fulfillWithValue(response.data.data);
-        } catch (error) {
-            if (isAxiosUnauthorizedError<FailureApiResponse<ErrorField[]>>(error) && error.response) {
-                return thunkAPI.rejectWithValue(error.response.data.error);
-            }
-            throw error;
-        }
+        const response = await cartApi.addItemToCart(body, thunkAPI);
+        return thunkAPI.fulfillWithValue(response.data.data);
     }
 );
 
@@ -86,9 +78,9 @@ export const cartSlice = createSlice({
     name: 'cart',
     initialState,
     reducers: {
-        setCartInfo: (state, action: PayloadAction<GotCartSummaryResponse>) => {
+        resetAddedCartItem: (state) => {
             state.isLoading = false
-            state.cart!.summary = action.payload
+            state.cart.item.added = null
         }
     },
     extraReducers: (builder) => {
@@ -108,36 +100,59 @@ export const cartSlice = createSlice({
                 state.isLoading = false
             }
         })
-        builder.addCase(addItemToCart.fulfilled, (state, action) => {
+
+        builder.addCase(addItemToCart.pending, (state, action) => {
             if (action.payload) {
-                state.error = null
-                state.cart.summary!.total_count = action.payload.total_count
-                const item = state.cart.summary!.items.find(item => item.id === action.payload.item_id)
-                item!.quantity = action.payload.item_quantity
-                toast.message("Đã thêm sản phẩm vào giỏ hàng!",
-                    {
-                        className: 'w-64 border-green-600 border',
-                        position: 'bottom-center',
-                        description: React.createElement('div', {className: 'grid grid-cols-4 mt-2'},
-                            React.createElement('img', {className: 'w-12 h-12', src: action.payload.item_thumbnail}),
-                            React.createElement('div', {className: 'grid col-span-3'},
-                                React.createElement('div', {className: 'text-sm tracking-tighter place-content-center font-semibold'}, action.payload.item_title),
-                                React.createElement('div', {className: 'text-sm place-content-center text-green-600 font-medium'}, formatCurrency(action.payload.item_price))
-                            )
-                        ),
-                        duration: 800
-                    }
-                )
+                state.isLoading = true
             }
         })
+
+        builder.addCase(addItemToCart.fulfilled, (state, action) => {
+            if (action.payload) {
+                state.cart.summary!.total_count = action.payload.total_count
+                state.cart.item.added = action.payload
+                const item = state.cart.summary!.items.find(item => item.id === action.payload.item_id)
+                if (item) {
+                    item.quantity = action.payload.item_quantity
+                }else {
+                    state.cart.summary!.items.push({
+                        id: action.payload.item_id,
+                        quantity: action.payload.item_quantity,
+                        price: action.payload.item_price,
+                        subtotal: action.payload.item_price * action.payload.item_quantity,
+                        product_id: action.payload.item_product_id,
+                        product_title: action.payload.item_title,
+                        product_thumbnail: action.payload.item_thumbnail,
+                    })
+                }
+
+                // const item = state.cart.summary!.items.find(item => item.id === action.payload.item_id)
+                // item!.quantity = action.payload.item_quantity
+                // toast.message("Đã thêm sản phẩm vào giỏ hàng!",
+                //     {
+                //         className: 'w-64 border-green-600 border',
+                //         position: 'bottom-center',
+                //         description: React.createElement('div', {className: 'grid grid-cols-4 mt-2'},
+                //             React.createElement('img', {className: 'w-12 h-12', src: action.payload.item_thumbnail}),
+                //             React.createElement('div', {className: 'grid col-span-3'},
+                //                 React.createElement('div', {className: 'text-sm tracking-tighter place-content-center font-semibold'}, action.payload.item_title),
+                //                 React.createElement('div', {className: 'text-sm place-content-center text-green-600 font-medium'}, formatCurrency(action.payload.item_price))
+                //             )
+                //         ),
+                //         duration: 800
+                //     }
+                // )
+            }
+        })
+
         builder.addCase(addItemToCart.rejected, (state, action) => {
             if (action.payload) {
-                state.error = action.payload
+                state.isLoading = false
             }
         })
         builder.addCase(changeQuantityOfItemInCart.fulfilled, (state, action) => {
             if (action.payload) {
-                state.error = null
+                // state.error = null
                 const item = state.cart.summary!.items.find(item => item.id === action.payload.item_id)
                 item!.quantity = action.payload.item_quantity
                 const newSubtotal = item!.quantity * item!.price
@@ -147,12 +162,13 @@ export const cartSlice = createSlice({
         })
         builder.addCase(changeQuantityOfItemInCart.rejected, (state, action) => {
             if (action.payload) {
-                state.error = action.payload
+                state.isLoading = false
+                // state.error = action.payload
             }
         })
         builder.addCase(removeItemFromCart.fulfilled, (state, action) => {
             if (action.payload) {
-                state.error = null
+                // state.error = null
                 const item = state.cart.summary!.items.find(item => item.id === action.payload.item_id)
                 const indexOfItem = state.cart.summary!.items.indexOf(item!)
                 state.cart.summary!.items.splice(indexOfItem, 1)
@@ -163,5 +179,5 @@ export const cartSlice = createSlice({
     }
 });
 
-export const {setCartInfo} = cartSlice.actions;
+export const {resetAddedCartItem} = cartSlice.actions;
 export default cartSlice.reducer;

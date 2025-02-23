@@ -14,16 +14,23 @@ import AvatarDropdown from "@/components/common/AvatarDropdown.tsx";
 import CartDropDown from "@/components/common/CartDropDown.tsx";
 import WishlistDropDown from "@/components/common/WishlistDropDown.tsx";
 import {MagnifyingGlassIcon} from "@heroicons/react/24/outline"
-import {CommandDialog, CommandInput, CommandItem, CommandList} from "@/components/ui/command.tsx";
+import {CommandDialog, CommandEmpty, CommandInput, CommandItem, CommandList} from "@/components/ui/command.tsx";
 import {useEffect, useState} from "react";
 import {getAllCategories} from "@/redux/slice/category.slice.ts";
+import {searchProduct} from "@/redux/slice/product.slice.ts";
 
 const Header = () => {
-    const [isOpen, setIsOpen] = useState<boolean>(false)
+    const [open, setOpen] = useState<boolean>(false)
     const dispatch = useAppDispatch()
     const {category} = useAppSelector(state => state.category);
-    const {isAuthenticated, userInfo} = useAppSelector(state => state.account);
+    const {product} = useAppSelector(state => state.product);
+    const {authentication} = useAppSelector(state => state.authentication);
+    const loggedInAuth = authentication.loggedIn
+    const [emptyKeyword, setEmptyKeyword] = useState(true);
+    const {account} = useAppSelector(state => state.account);
+    const gotAccountInfo = account.info.got
     const allCategories = category.all
+    const searchedProduct = product.searched
 
     useEffect(() => {
         if (!allCategories) {
@@ -31,6 +38,17 @@ const Header = () => {
             return () => promise.abort()
         }
     }, [allCategories])
+
+
+    const handleSearchProduct = (keyword: string) => {
+        if (keyword){
+            setEmptyKeyword(false);
+            const promise = dispatch(searchProduct(keyword))
+            return () => promise.abort()
+        }else {
+            setEmptyKeyword(true);
+        }
+    }
 
     return (
         <div className="bg-white/70 dark:bg-neutral-900/60 backdrop-blur-lg backdrop-filter sticky top-0 w-full left-0 right-0 z-40 shadow-sm dark:border-b dark:border-neutral-700 text-left">
@@ -118,43 +136,41 @@ const Header = () => {
                                         </ul>
                                     </NavigationMenuContent>
                                 </NavigationMenuItem>
-                                <NavigationMenuItem>
-                                    <Link to="/about-us">
-                                        <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "text-lg text-black bg-transparent hover:bg-transparent")}>
-                                            Về chúng tôi
-                                        </NavigationMenuLink>
-                                    </Link>
-                                </NavigationMenuItem>
-                                <NavigationMenuItem>
-                                    <Link to="/contact-us">
-                                        <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "text-lg text-black bg-transparent hover:bg-transparent")}>
-                                            Liên hệ
-                                        </NavigationMenuLink>
-                                    </Link>
-                                </NavigationMenuItem>
                             </NavigationMenuList>
                          </NavigationMenu>
                     </div>
                     <div className="flex items-stretch justify-end flex-1 text-neutral-600 space-x-2">
                         <Button variant="outline" className="relative p-0 h-auto xl:w-60 xl:justify-start xl:px-3 xl:py-2"
-                                onClick={() => setIsOpen(true)}>
+                                onClick={() => setOpen(true)}>
                             <MagnifyingGlassIcon />
                             <span className="hidden xl:inline-flex text-base">Tìm kiếm sản phẩm...</span>
                         </Button>
-                        <CommandDialog open={isOpen} onOpenChange={setIsOpen}>
-                            <CommandInput placeholder="Tìm kiếm sản phẩm..."/>
+                        <CommandDialog open={open} onOpenChange={setOpen}>
+                            <CommandInput onValueChange={handleSearchProduct} placeholder="Nhập tên hoặc tiêu đề sản phẩm ..."/>
                             <CommandList>
-                                <CommandItem>ABC</CommandItem>
+                                <CommandEmpty>{emptyKeyword ? <>Kết quả tìm kiếm sản phẩm hiển thị ở đây</> : <>Không tìm thấy sản phẩm phù hợp</>}</CommandEmpty>
+                                {
+                                    !emptyKeyword && searchedProduct?.items.map((item) => (
+                                        <CommandItem asChild value={item.title} onSelect={() => {
+                                            setOpen(false)
+                                            setEmptyKeyword(true);
+                                        }}>
+                                            <Link className="text-neutral-600 hover:!text-green-600" to={`/products/${item.id}`}>{item.title}</Link>
+                                        </CommandItem>
+                                    ))
+                                }
                             </CommandList>
                         </CommandDialog>
 
                         {
-                            (isAuthenticated && userInfo) ?
-                                <div className="flex items-center space-x-4">
+                            (gotAccountInfo || loggedInAuth) ?
+                                <div className="flex items-center space-x-2">
                                     <WishlistDropDown/>
                                     <CartDropDown/>
-                                    <AvatarDropdown email={userInfo.email} fullName={userInfo.full_name}
-                                                    avatar={userInfo.avatar}/>
+                                    <AvatarDropdown
+                                        email={gotAccountInfo?.email ? gotAccountInfo!.email : loggedInAuth!.metadata.email}
+                                        fullName={gotAccountInfo?.full_name ? gotAccountInfo!.full_name : loggedInAuth!.metadata.full_name}
+                                    />
                                 </div> :
                                 <div className="flex items-stretch space-x-2">
                                     <Button className="text-lg h-auto font-bold hover:text-green-400" variant="default"

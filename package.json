@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-react": "^9.4.0",
     "@glidejs/glide": "^3.6.2",
     "@headlessui/react": "^2.1.10",
     "@heroicons/react": "^2.1.5",
@@ -49,6 +50,7 @@
     "@types/webfontloader": "^1.6.38",
     "async-mutex": "^0.5.0",
     "axios": "^1.7.7",
+    "ckeditor5": "^44.1.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.4",

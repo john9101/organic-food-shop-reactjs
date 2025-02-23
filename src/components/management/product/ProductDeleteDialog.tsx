@@ -9,6 +9,7 @@ import {Button} from "@/components/ui/button.tsx";
 import {useAppDispatch, useAppSelector} from "@/redux/hook.ts";
 import {deleteProduct, resetDeletedProduct} from "@/redux/slice/product.slice.ts";
 import {useEffect} from "react";
+import {toast} from "sonner";
 
 interface ProductDeleteDialogProps {
     open: boolean;
@@ -23,8 +24,12 @@ export const ProductDeleteDialog = ({open, onOpenChange, id}: ProductDeleteDialo
 
     useEffect(() => {
         if (deletedProduct){
-            onOpenChange(false)
+            toast.success(`Đã xóa sản phẩm mã ${deletedProduct.id} thành công`, {
+                position: "top-right",
+                duration: 2000,
+            })
             dispatch(resetDeletedProduct())
+            setTimeout(() => onOpenChange(false), 2000)
         }
     }, [deletedProduct]);
 
@@ -39,12 +44,12 @@ export const ProductDeleteDialog = ({open, onOpenChange, id}: ProductDeleteDialo
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Xóa sản phẩm</DialogTitle>
+                    <DialogTitle className="text-green-600">Xóa sản phẩm</DialogTitle>
                 </DialogHeader>
-                <div>Xóa sản phẩm là thao tác không khôi phục được. Nếu chắc chắn xóa sản phẩm này hãy nhấn nút xác nhận</div>
+                <div>Nếu chắc chắn xóa sản phẩm này hãy nhấn nút xác nhận tuy nhưng vẫn có thể khôi phục sau khi xóa</div>
                 <DialogFooter>
                     <Button variant="secondary" onClick={() => onOpenChange(false)}>Hủy</Button>
-                    <Button onClick={() => handleDeleteProduct()}>Xác nhận</Button>
+                    <Button className="bg-green-600 hover:bg-green-500" onClick={() => handleDeleteProduct()}>Xác nhận</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

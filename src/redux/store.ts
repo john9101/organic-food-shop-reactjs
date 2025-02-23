@@ -6,16 +6,22 @@ import orderReducer from '@/redux/slice/order.slice.ts';
 import userReducer from '@/redux/slice/user.slice.ts';
 import categoryReducer from '@/redux/slice/category.slice.ts';
 import brandReducer from '@/redux/slice/brand.slice.ts';
+import voucherReducer from '@/redux/slice/voucher.slice.ts';
+import commentReducer from '@/redux/slice/comment.slice.ts';
+import authenticationReduce from '@/redux/slice/authentication.slice.ts';
 
 export const store = configureStore({
     reducer: {
+        'authentication': authenticationReduce,
         'account': accountReducer,
         'product': productReducer,
         'cart': cartReducer,
         'order': orderReducer,
         'user': userReducer,
         'category': categoryReducer,
-        'brand': brandReducer
+        'brand': brandReducer,
+        'voucher': voucherReducer,
+        'comment': commentReducer,
     }
 })
 

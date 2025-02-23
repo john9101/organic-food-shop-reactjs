@@ -12,6 +12,7 @@ import {Input} from "@/components/ui/input.tsx";
 import {useEffect} from "react";
 import {useAppDispatch, useAppSelector} from "@/redux/hook.ts";
 import {getCategoryDetail} from "@/redux/slice/category.slice.ts";
+import {Textarea} from "@/components/ui/textarea.tsx";
 
 interface CategoryDetailDialogProps {
     open: boolean;
@@ -35,22 +36,22 @@ export const CategoryDetailDialog = ({open, onOpenChange, id}: CategoryDetailDia
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-xl">
                 <DialogHeader>
-                    <DialogTitle>Chi tiết danh mục sản phẩm</DialogTitle>
-                    <DialogDescription>Thông tin chi tiết về danh mục sản phẩm</DialogDescription>
+                    <DialogTitle className="text-green-600">Chi tiết danh mục</DialogTitle>
+                    <DialogDescription>Thông tin chi tiết về danh mục</DialogDescription>
                 </DialogHeader>
                 <div className="grid grid-cols-2 gap-6">
                     <div className="flex flex-col space-y-1.5">
-                        <Label>Mã danh mục sản phẩm</Label>
+                        <Label>Mã</Label>
                         <Input disabled value={categoryDetail?.id}/>
                     </div>
                     <div className="flex flex-col space-y-1.5">
-                        <Label>Tên danh mục sản phẩm</Label>
+                        <Label>Tên</Label>
                         <Input disabled value={categoryDetail?.name}/>
                     </div>
 
                     <div className="flex flex-col space-y-1.5 col-span-2">
-                        <Label>Mô tả danh mục sản phẩm</Label>
-                        <Input disabled value={categoryDetail?.description}/>
+                        <Label>Mô tả</Label>
+                        <Textarea disabled value={categoryDetail?.description}/>
                     </div>
                 </div>
                 <DialogFooter>

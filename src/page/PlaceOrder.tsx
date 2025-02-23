@@ -5,11 +5,10 @@ import {
     BreadcrumbList, BreadcrumbPage,
     BreadcrumbSeparator
 } from "@/components/ui/breadcrumb.tsx";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import {
     BanknotesIcon,
     MapIcon,
-    TruckIcon,
     TicketIcon,
     RectangleGroupIcon,
     PercentBadgeIcon
@@ -24,10 +23,9 @@ import {
     FormMessage
 } from "@/components/ui/form.tsx";
 import {Input} from "@/components/ui/input.tsx";
-import {useForm} from "react-hook-form";
+import {FieldValues, useForm} from "react-hook-form";
 import {yupResolver} from "@hookform/resolvers/yup";
 import {Textarea} from "@/components/ui/textarea.tsx";
-import {Label} from "@/components/ui/label.tsx";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group.tsx";
 import {Badge} from "@/components/ui/badge.tsx";
 import {formatCurrency} from "@/util/decoration.util.ts";
@@ -57,6 +55,7 @@ import {placeOrder} from "@/redux/slice/order.slice.ts";
 const PlaceOrder = () => {
     const {cart} = useAppSelector(state => state.cart)
     const cartSummary = cart.summary
+    const navigate = useNavigate()
     const [openSelectionPlaceContent, setOpenSelectionPlaceContent] = useState<boolean>(false);
     const [listItemPlaces, setListItemPlaces] = useState<SearchedPlaceResponse['predictions'] | null>(null)
     const dispatch = useAppDispatch()
@@ -65,8 +64,17 @@ const PlaceOrder = () => {
 
     useEffect(() => {
         if (placedOrder) {
-            if(placedOrder.payment_url){
-                window.location.href = placedOrder.payment_url
+            if (placedOrder.id){
+                if(placedOrder.payment_url){
+                    window.location.href = placedOrder.payment_url
+                }else {
+                    const params = new URLSearchParams({
+                        id: placedOrder.id,
+                        status: "success",
+                        method: placedOrder.payment_method
+                    })
+                    navigate(`/order-result?${params}`)
+                }
             }
         }
     },[placedOrder])
@@ -125,10 +133,10 @@ const PlaceOrder = () => {
 
                                 <FormField
                                     control={placeOrderForm.control}
-                                    name="fullName"
+                                    name="recipientFullName"
                                     render={({field}) => (
-                                        <FormItem className="flex flex-col items-start col-span-2">
-                                            <FormLabel className="text-black">Họ và tên <span className="text-red-600">*</span></FormLabel>
+                                        <FormItem className="flex flex-col items-start">
+                                            <FormLabel className="text-black">Họ và tên người nhận hàng <span className="text-red-600">*</span></FormLabel>
                                             <FormControl>
                                                 <Input {...field} autoComplete="on" />
                                             </FormControl>
@@ -139,10 +147,10 @@ const PlaceOrder = () => {
 
                                 <FormField
                                     control={placeOrderForm.control}
-                                    name="phone"
+                                    name="recipientPhone"
                                     render={({field}) => (
                                         <FormItem className="flex flex-col items-start">
-                                            <FormLabel className="text-black">Số điện thoại <span className="text-red-600">*</span>
+                                            <FormLabel className="text-black">Số điện thoại người nhận hàng <span className="text-red-600">*</span>
                                             </FormLabel>
                                             <FormControl>
                                                 <Input {...field} autoComplete="on"/>
@@ -154,10 +162,10 @@ const PlaceOrder = () => {
 
                                 <FormField
                                     control={placeOrderForm.control}
-                                    name="email"
+                                    name="recipientEmail"
                                     render={({field}) => (
                                         <FormItem className="flex flex-col items-start">
-                                            <FormLabel className="text-black">Email <span className="text-red-600">*</span>
+                                            <FormLabel className="text-black">Email người nhận hàng <span className="text-red-600">*</span>
                                             </FormLabel>
                                             <FormControl>
                                                 <Input {...field} autoComplete="on"/>
@@ -169,10 +177,10 @@ const PlaceOrder = () => {
 
                                 <FormField
                                     control={placeOrderForm.control}
-                                    name="address"
+                                    name="recipientSpecificPlace"
                                     render={({field}) => (
-                                        <FormItem className="flex flex-col items-start col-span-2">
-                                            <FormLabel className="text-black">Địa chỉ <span className="text-red-600">*</span></FormLabel>
+                                        <FormItem className="flex flex-col items-start col-span-3">
+                                            <FormLabel className="text-black">Địa chỉ người nhận hàng <span className="text-red-600">*</span></FormLabel>
                                             <FormControl>
                                                 <div className="relative w-full">
                                                     <Input {...field} autoComplete="on"
@@ -183,11 +191,11 @@ const PlaceOrder = () => {
                                                     {
                                                         openSelectionPlaceContent &&
                                                         <div
-                                                            className="absolute top-full mt-2 rounded-lg border border-input grid bg-white p-2 w-full">
+                                                            className="absolute top-full mt-2 rounded-md border border-input grid bg-white p-2 w-full">
                                                             {
                                                                 listItemPlaces ? listItemPlaces.map((itemPlace, index) => (
                                                                     <div key={index}
-                                                                         className="py-1 px-1.5 text-sm hover:bg-zinc-100 rounded-lg cursor-pointer truncate"
+                                                                         className="p-2 text-sm hover:bg-zinc-100 rounded-md cursor-pointer truncate"
                                                                          onClick={() => {
                                                                              field.onChange(itemPlace.description)
                                                                              placeOrderForm.setValue("province", itemPlace.compound.province)
@@ -294,7 +302,7 @@ const PlaceOrder = () => {
                                 <FormField
                                     control={placeOrderForm.control}
                                     name="note"
-                                    render={({field}) => (
+                                    render={({field}: { field: FieldValues }) => (
                                         <FormItem className="flex flex-col items-start col-span-3">
                                             <FormLabel>Ghi chú</FormLabel>
                                             <FormControl>
@@ -326,7 +334,7 @@ const PlaceOrder = () => {
                                                             <div className="flex items-start">
                                                                 <div className="flex h-5 items-center mt-0.5">
                                                                     <FormControl>
-                                                                        <RadioGroupItem id={`payment-method-${index + 1}`} value={paymentMethod.value}/>
+                                                                        <RadioGroupItem id={`payment-method-${index + 1}`} value={paymentMethod.name}/>
                                                                     </FormControl>
                                                                 </div>
 
@@ -352,74 +360,6 @@ const PlaceOrder = () => {
                                     </FormItem>
                                 )}
                             />
-                        </div>
-                        <Separator orientation="horizontal"/>
-                        <div className="space-y-4">
-                            <Badge className="text-base font-medium text-white bg-green-600 py-2 px-4">
-                                <TruckIcon className="w-4 h-4 mr-1"/> Phương thúc vận chuyển</Badge>
-                            <RadioGroup
-                                className="grid grid-cols-1 gap-4 md:grid-cols-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-                                <div
-                                    className="rounded-lg border border-gray-200 bg-gray-50 p-4 ps-4 dark:border-gray-700 dark:bg-gray-800 cursor-pointer">
-                                    <div className="flex items-start">
-                                        <div className="flex h-5 items-center">
-                                            <RadioGroupItem id="sale" value={"1"}/>
-                                        </div>
-
-                                        <div className="ms-4 space-y-2 text-sm flex-1">
-                                            <Label htmlFor="sale"
-                                                   className="font-medium text-gray-900 dark:text-white relative grid grid-cols-5">
-                                                <p className="col-span-4">Tiết kiệm</p>
-                                                <Badge
-                                                    className="absolute right-0 top-1/2 translate-x-0 -translate-y-1/2 bg-amber-500 font-bold">{formatCurrency(50000)}</Badge>
-                                            </Label>
-                                            <p className="mt-1 text-xs font-normal text-gray-500 dark:text-gray-400">
-                                                Thời gian giao hàng 4-5 ngày
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div
-                                    className="rounded-lg border border-gray-200 bg-gray-50 p-4 ps-4 dark:border-gray-700 dark:bg-gray-800 cursor-pointer">
-                                    <div className="flex items-start">
-                                        <div className="flex h-5 items-center">
-                                            <RadioGroupItem id="fast" value={"2"}/>
-                                        </div>
-
-                                        <div className="ms-4 space-y-2 text-sm flex-1">
-                                            <Label htmlFor="fast"
-                                                   className="font-medium text-gray-900 dark:text-white relative grid grid-cols-5">
-                                                <p className="col-span-4">Nhanh</p>
-                                                <Badge
-                                                    className="absolute right-0 top-1/2 translate-x-0 -translate-y-1/2 bg-amber-500 font-bold">{formatCurrency(80000)}</Badge>
-                                            </Label>
-                                            <p className="mt-1 text-xs font-normal text-gray-500 dark:text-gray-400">
-                                                Thời gian giao hàng 2-3 ngày
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div
-                                    className="rounded-lg border border-gray-200 bg-gray-50 p-4 ps-4 dark:border-gray-700 dark:bg-gray-800 cursor-pointer">
-                                    <div className="flex items-start">
-                                        <div className="flex h-5 items-center">
-                                            <RadioGroupItem id="fast" value={"3"}/>
-                                        </div>
-
-                                        <div className="ms-4 space-y-2 text-sm flex-1">
-                                            <Label htmlFor="fast"
-                                                   className="font-medium text-gray-900 dark:text-white relative grid grid-cols-5">
-                                                <p className="col-span-4">Hỏa tốc</p>
-                                                <Badge
-                                                    className="absolute right-0 top-1/2 translate-x-0 -translate-y-1/2 bg-amber-500 font-bold">{formatCurrency(120000)}</Badge>
-                                            </Label>
-                                            <p className="mt-1 text-xs font-normal text-gray-500 dark:text-gray-400">
-                                                Thời gian giao hàng 1 ngày
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </RadioGroup>
                         </div>
                     </div>
                     <div className=" w-full space-y-6 lg:max-w-xs xl:max-w-md">
@@ -482,8 +422,8 @@ const PlaceOrder = () => {
                             </div>
                             <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-4">
                                 <div className="grid gap-4">
-                                    <CouponTicket/>
-                                    <CouponTicket/>
+                                    {/*<CouponTicket/>*/}
+                                    {/*<CouponTicket/>*/}
                                 </div>
                             </div>
                         </div>
@@ -491,9 +431,7 @@ const PlaceOrder = () => {
                         <div className="flow-root">
                             <div className="-my-3 divide-y divide-gray-200 dark:divide-gray-800">
                                 <dl className="flex items-center justify-between gap-4 py-3">
-                                    <dt className="text-base font-normal text-gray-500 dark:text-gray-400">Tổng tiền đơn
-                                        hàng
-                                    </dt>
+                                    <dt className="text-base font-normal text-gray-500 dark:text-gray-400">Tổng tiền tạm tính</dt>
                                     <dd className="text-base font-medium text-gray-900 dark:text-white">{formatCurrency(cartSummary?.total_price)}</dd>
                                 </dl>
 
@@ -503,16 +441,7 @@ const PlaceOrder = () => {
                                 </dl>
 
                                 <dl className="flex items-center justify-between gap-4 py-3">
-                                    <dt className="text-base font-normal text-gray-500 dark:text-gray-400">Phí vận
-                                        chuyển
-                                    </dt>
-                                    <dd className="text-base font-medium text-gray-900 dark:text-white">$99</dd>
-                                </dl>
-
-                                <dl className="flex items-center justify-between gap-4 py-3">
-                                    <dt className="text-base font-bold text-gray-900 dark:text-white">Tổng tiền thanh
-                                        toán
-                                    </dt>
+                                    <dt className="text-base font-bold text-gray-900 dark:text-white">Tổng tiền đơn hàng</dt>
                                     <dd className="text-base font-bold text-gray-900 dark:text-white">$8,392.00</dd>
                                 </dl>
                             </div>
@@ -523,7 +452,7 @@ const PlaceOrder = () => {
                                 hàng</Button>
                             <div className="flex text-base items-center justify-center gap-1">
                                 <span className="font-normal text-gray-500 dark:text-gray-400">Hoặc</span>
-                                <Link to="#" title=""
+                                <Link to="/cart" title=""
                                       className="inline-flex items-center font-semibold text-black underline hover:underline hover:text-green-600">
                                     Quay lại giỏ hàng
                                 </Link>

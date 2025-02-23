@@ -3,71 +3,70 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/compo
 import {Button} from "@/components/ui/button.tsx";
 import {Link, useNavigate} from "react-router-dom";
 import Logo from "@/components/common/Logo.tsx";
-import {useToast} from "@/hooks/use-toast.ts";
 import {useForm} from "react-hook-form";
 import {LoginRequest} from "@/type/request/authentication.request.ts";
 import {yupResolver} from "@hookform/resolvers/yup";
-import {loginSchema} from "@/schema/auth-user.schema.ts";
+import {loginSchema} from "@/schema/auth-account-user.schema.ts";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form.tsx";
-import authenticationApi from "@/api/authentication.api.ts";
-import {HttpStatusCode} from "axios";
-import {ErrorField, FailureApiResponse} from "@/type/response/api.type.ts";
-import {isAxiosUnauthorizedError} from "@/util/axios.util.ts";
 import {useAppDispatch, useAppSelector} from "@/redux/hook.ts";
-import {setUserInfo} from "@/redux/slice/account.slice.ts";
 import {useEffect} from "react";
+import {login} from "@/redux/slice/authentication.slice.ts";
+import {toast} from "sonner";
 
 const Login = () => {
     const navigate = useNavigate();
-    const { toast } = useToast()
     const dispatch = useAppDispatch()
-    const {isAuthenticated} = useAppSelector(state => state.account)
+    const {isAuthenticated, authentication} = useAppSelector(state => state.authentication)
+    const loggedInAuth = authentication.loggedIn;
 
     useEffect(() => {
-        if (isAuthenticated){
-            setTimeout(() => {
-                navigate("/")
-            },2000)
+        if (isAuthenticated && loggedInAuth){
+            toast.success("Đăng nhập thành công", {
+                position: "bottom-center"
+            })
+            navigate("/")
         }
-    },[isAuthenticated, navigate])
+    },[isAuthenticated, loggedInAuth])
 
     const loginForm = useForm<LoginRequest>({
         resolver: yupResolver(loginSchema)
     })
 
-    const onSubmit = async (body: LoginRequest) => {
-        try {
-            const response = await authenticationApi.login(body);
-            if (response.status === HttpStatusCode.Ok &&
-                response.data.status === HttpStatusCode.Ok &&
-                response.data.data) {
-                dispatch(setUserInfo(response.data.data))
-                localStorage.setItem('access_token', response.data.data.access_token!)
-                toast({
-                    className: "bg-green-500 text-white text-base",
-                    variant: "default",
-                    title: "Đăng nhập tài khoản thành công",
-                    duration: 2000
-                })
-            }else {
-                toast({
-                    className: "text-base",
-                    variant: "destructive",
-                    title: "Đăng nhập tài khoản không thành công",
-                    duration: 2000,
-                })
-            }
-        }catch (error) {
-            if (isAxiosUnauthorizedError<FailureApiResponse<ErrorField[]>>(error) && error.response) {
-                toast({
-                    className: "text-base",
-                    variant: "destructive",
-                    title: "Đăng nhập tài khoản không thành công",
-                    description: error.response.data.error[0].detail,
-                    duration: 2000
-                })
-            }
-        }
+    const onSubmit = (body: LoginRequest) => {
+        const promise = dispatch(login(body))
+        return () => promise.abort()
+        // try {
+        //     const response = await authenticationApi.login(body);
+        //     if (response.status === HttpStatusCode.Ok &&
+        //         response.data.status === HttpStatusCode.Ok &&
+        //         response.data.data) {
+        //         dispatch(setUserInfo(response.data.data))
+        //         localStorage.setItem('access_token', response.data.data.access_token!)
+        //         toast({
+        //             className: "bg-green-500 text-white text-base",
+        //             variant: "default",
+        //             title: "Đăng nhập tài khoản thành công",
+        //             duration: 2000
+        //         })
+        //     }else {
+        //         toast({
+        //             className: "text-base",
+        //             variant: "destructive",
+        //             title: "Đăng nhập tài khoản không thành công",
+        //             duration: 2000,
+        //         })
+        //     }
+        // }catch (error) {
+        //     if (isAxiosUnauthorizedError<FailureApiResponse<ErrorField[]>>(error) && error.response) {
+        //         toast({
+        //             className: "text-base",
+        //             variant: "destructive",
+        //             title: "Đăng nhập tài khoản không thành công",
+        //             description: error.response.data.error[0].detail,
+        //             duration: 2000
+        //         })
+        //     }
+        // }
     }
 
     return (

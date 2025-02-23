@@ -10,13 +10,18 @@ import {Button} from "@/components/ui/button.tsx";
 import {Input} from "@/components/ui/input.tsx";
 import {useEffect} from "react";
 import {useAppDispatch, useAppSelector} from "@/redux/hook.ts";
-import {getCategoryDetail, resetEditedCategory} from "@/redux/slice/category.slice.ts";
+import {
+    editCategory,
+    getCategoryDetail,
+    resetEditedCategory
+} from "@/redux/slice/category.slice.ts";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form.tsx";
-import {useForm} from "react-hook-form";
+import {FieldValues, useForm} from "react-hook-form";
 import {EditCategoryRequest} from "@/type/request/category.request.ts";
 import {yupResolver} from "@hookform/resolvers/yup";
 import {editCategorySchema} from "@/schema/category.schema.ts";
-import {useNavigate} from "react-router-dom";
+import {toast} from "sonner";
+import {Textarea} from "@/components/ui/textarea.tsx";
 
 interface CategoryEditDialogProps {
     open: boolean;
@@ -26,17 +31,9 @@ interface CategoryEditDialogProps {
 
 export const CategoryEditDialog = ({open, onOpenChange, id}: CategoryEditDialogProps) => {
     const dispatch = useAppDispatch();
-    const navigate = useNavigate();
     const {category} = useAppSelector(state => state.category)
     const categoryDetail = category.detail
-    const categoryEdited = category.edited
-
-    useEffect(() => {
-        if (categoryEdited){
-            dispatch(resetEditedCategory())
-            navigate("/category-management")
-        }
-    }, [categoryEdited]);
+    const editedCategory= category.edited
 
     useEffect(() => {
         if (id) {
@@ -44,6 +41,17 @@ export const CategoryEditDialog = ({open, onOpenChange, id}: CategoryEditDialogP
             return () => promise.abort()
         }
     }, [id])
+
+    useEffect(() => {
+        if (editedCategory){
+            toast.success(`Đã chỉnh sửa thông tin danh mục sản phẩm mã ${editedCategory.id} thành công`, {
+                position: "top-right",
+                duration: 2000,
+            })
+            dispatch(resetEditedCategory())
+            setTimeout(() => onOpenChange(false), 2000)
+        }
+    }, [editedCategory]);
 
     useEffect(() => {
         if (categoryDetail) {
@@ -56,18 +64,20 @@ export const CategoryEditDialog = ({open, onOpenChange, id}: CategoryEditDialogP
 
     const editCategoryForm = useForm<EditCategoryRequest>({
         resolver: yupResolver(editCategorySchema),
+
     })
 
     const onSubmitEditCategoryForm = (body: EditCategoryRequest) => {
-        console.log(body)
+        const promise = dispatch(editCategory({body: body, categoryId: id!}))
+        return () => promise.abort()
     }
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-xl">
                 <DialogHeader>
-                    <DialogTitle>Chỉnh sửa thông tin danh mục sản phẩm</DialogTitle>
-                    <DialogDescription>Nhập thông tin chirh sửa về danh mục sản phẩm</DialogDescription>
+                    <DialogTitle className="text-green-600">Chỉnh sửa thông tin danh mục</DialogTitle>
+                    <DialogDescription>Nhập thông tin chirh sửa về danh mục</DialogDescription>
                 </DialogHeader>
                 <Form {...editCategoryForm}>
                     <form onSubmit={editCategoryForm.handleSubmit(onSubmitEditCategoryForm)} className="space-y-6">
@@ -93,11 +103,11 @@ export const CategoryEditDialog = ({open, onOpenChange, id}: CategoryEditDialogP
                             <FormField
                                 control={editCategoryForm.control}
                                 name="description"
-                                render={({field}) => (
+                                render={({field}: { field: FieldValues }) => (
                                     <FormItem className="flex flex-col items-start">
                                         <FormLabel>Mô tả danh mục sản phẩm</FormLabel>
                                         <FormControl>
-                                            <Input {...field} autoComplete="on"/>
+                                            <Textarea {...field} autoComplete="on"/>
                                         </FormControl>
                                     </FormItem>
                                 )}
@@ -105,7 +115,7 @@ export const CategoryEditDialog = ({open, onOpenChange, id}: CategoryEditDialogP
                         </div>
                         <DialogFooter>
                             <Button variant="secondary" onClick={() => onOpenChange(false)}>Đóng</Button>
-                            <Button type="submit">Lưu</Button>
+                            <Button type="submit" className="bg-green-600 hover:bg-green-500">Lưu</Button>
                         </DialogFooter>
                     </form>
                 </Form>

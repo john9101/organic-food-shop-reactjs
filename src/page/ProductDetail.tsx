@@ -2,7 +2,7 @@ import {StarIcon} from "@heroicons/react/24/solid";
 import {formatCurrency} from "@/util/decoration.util.ts";
 import {Badge} from "@/components/ui/badge.tsx";
 import {ChatBubbleLeftRightIcon, QueueListIcon} from "@heroicons/react/16/solid";
-import {ShoppingBagIcon, HeartIcon} from "@heroicons/react/24/outline";
+import {ShoppingBagIcon, HeartIcon, ChatBubbleLeftEllipsisIcon} from "@heroicons/react/24/outline";
 import {Button} from "@/components/ui/button.tsx";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs.tsx";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form.tsx";
@@ -10,33 +10,75 @@ import {useForm} from "react-hook-form";
 import {yupResolver} from "@hookform/resolvers/yup";
 import {Textarea} from "@/components/ui/textarea.tsx";
 import Comment from "@/components/common/Comment.tsx";
-import {Progress} from "@/components/ui/progress.tsx";
 import Review from "@/components/common/Review.tsx";
 import {useParams} from "react-router-dom";
-import {SendCommentRequest} from "@/type/request/send.request.ts";
-import {sendCommentSchema} from "@/schema/send.schema.ts";
+import {AddCommentRequest} from "@/type/request/comment.request.ts";
+import {addCommentSchema} from "@/schema/comment.schema.ts";
 import {useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector} from "@/redux/hook.ts";
 import {getProductDetail} from "@/redux/slice/product.slice.ts";
 import QuantityChanger from "@/components/common/QuantityChanger.tsx";
 import {Separator} from "@/components/ui/separator.tsx";
-// import ImageShowCase from "@/components/common/ImageShowCase.tsx";
 import {AddItemToCartRequest} from "@/type/request/cart.request.ts";
-import {addItemToCart} from "@/redux/slice/cart.slice.ts";
+import {addItemToCart, resetAddedCartItem} from "@/redux/slice/cart.slice.ts";
+import {
+    Carousel,
+    CarouselMainContainer,
+    CarouselThumbsContainer,
+    SliderMainItem, SliderThumbItem
+} from "@/components/extension/carousel.tsx";
+import {toast} from "sonner";
+import {
+    addComment,
+    getCommentsOfProduct,
+    resetAddedComment,
+    resetCommentsOfProduct
+} from "@/redux/slice/comment.slice.ts";
 
 const ProductDetail = () => {
     const {id} = useParams()
     const dispatch = useAppDispatch();
     const {product} = useAppSelector(state => state.product)
+    const {comment} = useAppSelector(state => state.comment)
+    const {cart} = useAppSelector(state => state.cart)
     const productDetail = product.detail
+    const addedComment = comment.added
+    const commentsOfProduct = comment.ofProduct
+    const addedCartItem = cart.item.added
     const [buyQuantity, setBuyQuantity] = useState<number>(1);
 
     useEffect(() => {
+        if (addedCartItem) {
+            toast.success(`Đã thêm sản phẩm ${addedCartItem.item_title} vào giỏ hàng!`, {
+                position: "bottom-center",
+                duration: 2000,
+                className: "w-56"
+            })
+            dispatch(resetAddedCartItem())
+        }
+    }, [addedCartItem])
+
+    useEffect(() => {
         if (id) {
+            dispatch(resetCommentsOfProduct())
             const promise = dispatch(getProductDetail(Number(id)))
             return () => promise.abort()
         }
     }, [id])
+
+    useEffect(() => {
+        if (!commentsOfProduct){
+            const promise = dispatch(getCommentsOfProduct(Number(id)))
+            return () => promise.abort()
+        }
+    }, [commentsOfProduct]);
+
+    useEffect(() => {
+        if (addedComment){
+            addCommentForm.reset({content: ""})
+            dispatch(resetAddedComment())
+        }
+    }, [addedComment]);
 
     const handleMinusBuyQuantity = () => {
         if (buyQuantity > 1) setBuyQuantity(buyQuantity - 1);
@@ -50,8 +92,8 @@ const ProductDetail = () => {
         setBuyQuantity(newBuyQuantity);
     };
 
-    const sendCommentForm = useForm<SendCommentRequest>({
-        resolver: yupResolver(sendCommentSchema)
+    const addCommentForm = useForm<AddCommentRequest>({
+        resolver: yupResolver(addCommentSchema)
     })
 
     const onSubmitAddItemToCartForm = () => {
@@ -62,16 +104,34 @@ const ProductDetail = () => {
         }
     }
 
-    const onSubmitSendCommentForm = (body: SendCommentRequest) => {
-        console.log(body)
+    const onSubmitAddCommentForm = (body: AddCommentRequest) => {
+        const promise = dispatch(addComment({productId: Number(id!), body: body}))
+        return () => promise.abort()
     }
 
     return (
         <div className="container mx-auto py-8 space-y-12">
             <div className="grid gap-10 md:grid-cols-2">
-                {/*<div className="grid gap-4">*/}
-                {/*    <ImageShowCase imageUrls={productDetail?.image_urls}/>*/}
-                {/*</div>*/}
+                <Carousel orientation="horizontal" className="w-full flex flex-col items-center gap-2">
+                    <div className="relative w-full basis-3/4">
+                        <CarouselMainContainer className="h-full">
+                            {productDetail?.images.map((image, index) => (
+                                <SliderMainItem key={index} className="border border-muted flex items-center justify-center rounded-md">
+                                    <img src={image.url} alt={String(image.id)} />
+                                </SliderMainItem>
+                            ))}
+                        </CarouselMainContainer>
+                        <Button variant="outline" className="absolute right-2 top-2"><HeartIcon/></Button>
+                    </div>
+                    <CarouselThumbsContainer className="w-full flex-1 basis-1/12">
+                        {productDetail?.images.map((image, index) => (
+                            <SliderThumbItem key={index} index={index} className="rounded-md bg-transparent flex-1">
+                                <img src={image.url} alt={String(image.id)} className="border border-muted flex items-center justify-center h-full w-full rounded-md cursor-pointer bg-background" />
+                            </SliderThumbItem>
+                        ))}
+                    </CarouselThumbsContainer>
+                </Carousel>
+
                 <div className="grid">
                     <div className="space-y-4">
                         <h2 className="text-3xl font-black tracking-tighter">{productDetail?.title}</h2>
@@ -96,13 +156,13 @@ const ProductDetail = () => {
                             </div>
                         </div>
                         <div className="space-x-1.5 flex items-center">
-                            {productDetail?.discount_percent_event && <Badge
-                                className="bg-green-600 text-base rounded-md">{productDetail?.discount_percent_event}</Badge>}
+                            {productDetail?.discount_percent && <Badge
+                                className="bg-green-600 text-base rounded-md">{productDetail?.discount_percent}</Badge>}
                             <div className="space-x-1.5">
                                 <span className="text-2xl text-green-600 font-bold tracking-[-0.15rem]">
                                     {productDetail?.discount_price ? formatCurrency(productDetail?.discount_price) : formatCurrency(productDetail?.regular_price)}
                                 </span>
-                                {productDetail?.discount_price && productDetail?.discount_percent_event && <span
+                                {productDetail?.discount_price && productDetail?.discount_percent && <span
                                     className="text-base font-medium text-neutral-400 tracking-[-0.1rem] line-through">{formatCurrency(productDetail?.regular_price)}</span>}
                             </div>
                         </div>
@@ -116,13 +176,6 @@ const ProductDetail = () => {
                                 <ShoppingBagIcon/> Thêm vào giỏ hàng
                             </Button>
                         </div>
-                        <div className='grid grid-cols-10 space-x-4'>
-                            <Button
-                                className="py-6 col-span-9 bg-amber-500 hover:bg-amber-400 tracking-tighter font-semibold text-lg">
-                                <ShoppingBagIcon/> Mua ngay
-                            </Button>
-                            <Button variant="outline" className="py-6"><HeartIcon/></Button>
-                        </div>
                         <Separator orientation="horizontal"/>
                         <div className="grid grid-cols-8">
                             <span className="font-semibold">Nhãn thẻ:</span>
@@ -133,7 +186,7 @@ const ProductDetail = () => {
                     </div>
                 </div>
             </div>
-            <div className="grid gap-10 md:grid-cols-2">
+            <div className="grid gap-10 md:grid-cols-2 ">
                 <div>
                     <Tabs defaultValue="detail-description">
                         <TabsList className="grid grid-cols-2 bg-transparent w-[400px]">
@@ -143,7 +196,7 @@ const ProductDetail = () => {
                             </TabsTrigger>
                             <TabsTrigger value="comment"
                                          className="bg-transparent flex gap-1 text-base select-none outline-none rounded-none shadow-none data-[state=active]:shadow-none border-b-2 border-x-0 border-t-0 focus:outline-none data-[state=active]:border-b-green-600 hover:border-b-transparent data-[state=active]:font-semibold">
-                                <ChatBubbleLeftRightIcon className="w-5 h-5"/> Bình luận (100)
+                                <ChatBubbleLeftRightIcon className="w-5 h-5"/> Bình luận
                             </TabsTrigger>
                         </TabsList>
                         <TabsContent value="detail-description" className="pt-4 space-y-10">
@@ -155,127 +208,78 @@ const ProductDetail = () => {
                         </TabsContent>
                         <TabsContent value="comment" className="pt-4 space-y-10">
                             <div className='grid space-y-4'>
-                                <Form {...sendCommentForm}>
-                                    <form onSubmit={sendCommentForm.handleSubmit(onSubmitSendCommentForm)}>
+                                <Form {...addCommentForm}>
+                                    <form onSubmit={addCommentForm.handleSubmit(onSubmitAddCommentForm)}>
                                         <FormField
-                                            control={sendCommentForm.control}
-                                            name="message"
+                                            control={addCommentForm.control}
+                                            name="content"
                                             render={({field}) => (
                                                 <FormItem>
                                                     <FormLabel
-                                                        className="text-xl font-semibold text-neutral-800 dark:text-neutral-200">Để
-                                                        lại bình luận của bạn</FormLabel>
+                                                        className="text-lg font-medium text-black tracking-tighter">Để
+                                                        lại bình luận về sản phẩm</FormLabel>
                                                     <FormControl>
-                                                        <Textarea {...field} className="rounded-xl !mt-4 resize-none"
-                                                                  rows={8}/>
+                                                        <Textarea {...field} rows={8}/>
                                                     </FormControl>
-                                                    <FormMessage/>
+                                                    <FormMessage className="text-xs text-red-600"/>
                                                 </FormItem>
                                             )}
                                         />
-                                        <div className="mt-4 space-x-3">
-                                            <Button
-                                                className="rounded-full bg-green-600 hover:bg-green-500 text-base font-medium p-6 border-none">Gửi
-                                                hình luận</Button>
-                                            <Button variant="outline" type="reset"
-                                                    className="rounded-full text-base font-medium p-6 hover:border-neutral-400">Hoàn
-                                                tác</Button>
-                                        </div>
+                                        <Button type="submit" className="mt-4 bg-green-600 hover:bg-green-500 text-base font-semibold ">Gửi
+                                            bình luận</Button>
                                     </form>
                                 </Form>
                             </div>
                             <div className="w-full">
-                                <ul className="space-y-6">
-                                    <li>
-                                        <Comment/>
-                                        <ul className="pl-4 mt-5 space-y-5 md:pl-11">
-                                            <li>
-                                                <Comment isNested/>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li>
-                                        <Comment/>
-                                        <ul className="pl-4 mt-5 space-y-5 md:pl-11">
-                                            <li>
-                                                <Comment isNested/>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li>
-                                        <Comment/>
-                                        <ul className="pl-4 mt-5 space-y-5 md:pl-11">
-                                            <li>
-                                                <Comment isNested/>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                </ul>
+                                {
+                                    commentsOfProduct?.items && <ul className="space-y-6">
+                                        {
+                                            commentsOfProduct.items.length > 0 ? commentsOfProduct.items.map((item, index) => (
+                                                <li key={index}>
+                                                    <Comment
+                                                        isReplied={true}
+                                                        id={item.id}
+                                                        content={item.content}
+                                                        commentatorName={item.commentator_name}
+                                                        createdAt={item.created_at}
+                                                        isDeleted={item.is_deleted}
+                                                    />
+                                                    {
+                                                        item.child_items &&
+                                                        <ul className="pl-4 mt-5 space-y-5 md:pl-10">
+                                                            {
+                                                                item.child_items.map((childItem, index) => (
+                                                                    <li key={index}>
+                                                                        <Comment
+                                                                            id={childItem.id}
+                                                                            isReplied={false}
+                                                                            content={childItem.content}
+                                                                            commentatorName={childItem.commentator_name}
+                                                                            createdAt={childItem.created_at}
+                                                                            isDeleted={childItem.is_deleted}
+                                                                        />
+                                                                    </li>
+                                                                ))
+                                                            }
+                                                        </ul>
+                                                    }
+                                                </li>
+                                            )) : <div className="grid border border-input border-dashed rounded-md place-content-center p-6">
+                                                <ChatBubbleLeftEllipsisIcon className="h-40 w-40 text-green-600 stroke-[0.5] mx-auto"/>
+                                                Chưa có bình luận nào về sản phẩm này hãy trở thành người đầu tiên
+                                            </div>
+                                        }
+                                    </ul>
+                                }
+
                             </div>
                         </TabsContent>
                     </Tabs>
                 </div>
                 <div className="space-y-4">
-                    <h2 className="text-2xl font-semibold">Khách hàng đánh giá (250)</h2>
-                    <div className="flex items-center gap-5">
-                        <div className="text-9xl font-extrabold tracking-[-1.2rem]">
-                            4.5<span className="text-3xl ml-3 font-light tracking-tighter">/ 5</span>
-                        </div>
-                        <div className="space-y-2 flex-1">
-                            <div className="flex items-center gap-2">
-                                <div className="flex items-center gap-0.5 font-medium text-amber-500">
-                                    <StarIcon className="w-4 h-4"/>
-                                    <StarIcon className="w-4 h-4"/>
-                                    <StarIcon className="w-4 h-4"/>
-                                    <StarIcon className="w-4 h-4"/>
-                                    <StarIcon className="w-4 h-4"/>
-                                </div>
-                                <Progress value={50} className='h-3' indicatorClassName="bg-green-600"/>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="flex items-center gap-0.5 font-medium text-amber-500">
-                                    <StarIcon className="w-4 h-4"/>
-                                    <StarIcon className="w-4 h-4"/>
-                                    <StarIcon className="w-4 h-4"/>
-                                    <StarIcon className="w-4 h-4"/>
-                                    <StarIcon className="w-4 h-4 text-zinc-200"/>
-                                </div>
-                                <Progress value={60} className='h-3' indicatorClassName="bg-green-600"/>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="flex items-center gap-0.5 font-medium text-amber-500">
-                                    <StarIcon className="w-4 h-4"/>
-                                    <StarIcon className="w-4 h-4"/>
-                                    <StarIcon className="w-4 h-4"/>
-                                    <StarIcon className="w-4 h-4 text-zinc-200"/>
-                                    <StarIcon className="w-4 h-4 text-zinc-200"/>
-                                </div>
-                                <Progress value={40} className='h-3' indicatorClassName="bg-green-600"/>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="flex items-center gap-0.5 font-medium text-amber-500">
-                                    <StarIcon className="w-4 h-4"/>
-                                    <StarIcon className="w-4 h-4"/>
-                                    <StarIcon className="w-4 h-4 text-zinc-200"/>
-                                    <StarIcon className="w-4 h-4 text-zinc-200"/>
-                                    <StarIcon className="w-4 h-4 text-zinc-200"/>
-                                </div>
-                                <Progress value={20} className='h-3' indicatorClassName="bg-green-600"/>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="flex items-center gap-0.5 font-medium text-amber-500">
-                                    <StarIcon className="w-4 h-4"/>
-                                    <StarIcon className="w-4 h-4 text-zinc-200"/>
-                                    <StarIcon className="w-4 h-4 text-zinc-200"/>
-                                    <StarIcon className="w-4 h-4 text-zinc-200"/>
-                                    <StarIcon className="w-4 h-4 text-zinc-200"/>
-                                </div>
-                                <Progress value={30} className='h-3' indicatorClassName="bg-green-600"/>
-                            </div>
-                        </div>
-                    </div>
+                    <h2 className="text-xl font-medium tracking-tighter">Đánh giá từ khách hàng đã mua</h2>
                     <div
-                        className="divide-y divide-neutral-100 !mt-10 dark:divide-neutral-800 w-full flex flex-col rounded-xl border-b sm:border-t sm:border-l sm:border-r border-neutral-200 dark:border-neutral-700 space-y-6 px-8 pb-8">
+                        className="divide-y divide-neutral-100 dark:divide-neutral-800 w-full flex flex-col rounded-xl border-b sm:border-t sm:border-l sm:border-r border-neutral-200 dark:border-neutral-700 space-y-6 px-8 pb-8">
                         <Review/>
                         <Review/>
                         <Review/>

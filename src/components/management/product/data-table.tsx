@@ -49,8 +49,8 @@ export function DataTable<TData, TValue>(
     return (
         <div className="space-y-4">
             <div className="flex items-stretch gap-2">
-                <h2 className="place-content-end font-bold text-2xl">Danh sách sản phẩm</h2>
-                <Button className="ml-auto hover:text-white" asChild>
+                <h2 className="place-content-end font-semibold text-2xl leading-none tracking-tighter text-green-600">Danh sách sản phẩm</h2>
+                <Button className="ml-auto hover:text-white bg-green-600 hover:bg-green-500" asChild>
                     <Link to="add">Thêm sản phẩm</Link>
                 </Button>
                 <DataTableViewOptions cols={cols}/>

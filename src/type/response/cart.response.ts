@@ -10,7 +10,6 @@ export type GotCartSummaryResponse = {
             subtotal: number,
             product_id: number,
             product_title: string,
-            product_slug: string,
             product_thumbnail: string,
         }
     ]
@@ -19,6 +18,7 @@ export type GotCartSummaryResponse = {
 export type AddedItemToCartResponse = {
     total_count: number,
     item_id: number,
+    item_product_id: number,
     item_title: string,
     item_quantity: number,
     item_price: number,

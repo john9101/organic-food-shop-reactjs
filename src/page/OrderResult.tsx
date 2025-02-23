@@ -2,11 +2,22 @@ import {useSearchParams} from "react-router-dom";
 import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {CheckCircleIcon, XCircleIcon} from "@heroicons/react/24/outline"
+import {useEffect} from "react";
+import {resetPlacedOrder} from "@/redux/slice/order.slice.ts";
+import {useAppDispatch} from "@/redux/hook.ts";
 
 const OrderResult = () => {
-    const [searchParams] = useSearchParams();
+    const [searchParams] = useSearchParams()
+    const dispatch = useAppDispatch()
     const id = searchParams.get("id");
     const status = searchParams.get("status") as 'success' | 'failed';
+
+    useEffect(() => {
+        if (id && status) {
+            dispatch(resetPlacedOrder())
+        }
+    }, [id, status]);
+
     return (
         <Card className="container mx-auto my-44 w-[400px]">
             <CardHeader>

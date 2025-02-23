@@ -1,5 +1,5 @@
 import {Popover, Transition} from "@headlessui/react";
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar.tsx";
+import {Avatar, AvatarFallback} from "@/components/ui/avatar.tsx";
 import {Fragment} from "react";
 import {Button} from "@/components/ui/button.tsx";
 import {Link} from "react-router-dom";
@@ -8,19 +8,17 @@ import {UserIcon, IdentificationIcon, ArchiveBoxIcon, ArrowLeftStartOnRectangleI
 interface AvatarDropDownProps {
     email: string;
     fullName: string;
-    avatar: string
 }
 
-const AvatarDropdown = ({email, fullName, avatar}: AvatarDropDownProps) => {
+const AvatarDropdown = ({email, fullName}: AvatarDropDownProps) => {
     return (
         <>
             <Popover className="relative flex">
                 {({close}) => (
                     <>
                         <Popover.Button className="rounded-full right-0 p-0 flex items-center justify-center focus:outline-none ">
-                            <Avatar className="text-black">
-                                {avatar && <AvatarImage src={avatar}/>}
-                                <AvatarFallback className="bg-transparent"><UserIcon className="w-8 h-8"/></AvatarFallback>
+                            <Avatar>
+                                <AvatarFallback className="bg-transparent"><UserIcon className="w-10 h-10 stroke-1"/></AvatarFallback>
                             </Avatar>
                         </Popover.Button>
                         <Transition
@@ -35,19 +33,18 @@ const AvatarDropdown = ({email, fullName, avatar}: AvatarDropDownProps) => {
                             <Popover.Panel className="absolute max-w-[260px] pt-2 top-full right-0 z-10 w-screen">
                                 <div className="rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                                     <div className="grid grid-cols-1 gap-2 p-4">
-                                        <div className="flex items-center space-x-2 py-2 text-black">
+                                        <div className="flex items-stretch space-x-2 py-2">
                                             <Avatar className="w-12 h-12">
-                                                {avatar && <AvatarImage src={avatar}/>}
-                                                <AvatarFallback className="bg-transparent"><UserIcon/></AvatarFallback>
+                                                <AvatarFallback className="bg-transparent"><UserIcon className="stroke-1"/></AvatarFallback>
                                             </Avatar>
-                                            <div className="flex-grow">
-                                                <h4 className="font-semibold text-lg">{fullName}</h4>
-                                                <p className="text-xs mt-0.5">{email}</p>
+                                            <div className="flex-grow grid">
+                                                <h4 className="font-bold tracking-tighter text-lg leading-none place-content-center">{fullName}</h4>
+                                                <p className="text-xs mt-0.5 place-content-center">{email}</p>
                                             </div>
                                         </div>
                                         <div className="w-full border-b border-neutral-200"/>
                                         <Button variant="ghost" asChild className="space-x-2 justify-start text-neutral-600 text-base">
-                                            <Link to="/account/profile" onClick={() => close()}><IdentificationIcon/> Tài khoản
+                                            <Link to="/account/info" onClick={() => close()}><IdentificationIcon/> Tài khoản
                                                 của
                                                 tôi</Link>
                                         </Button>

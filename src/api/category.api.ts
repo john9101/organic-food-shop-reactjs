@@ -3,9 +3,9 @@ import {Paging} from "@/type/response/paging.type.ts";
 import {ProductItem} from "@/type/response/productItem.type.ts";
 import instance from "@/util/http.ts";
 import {
-    AddedCategoryResponse, EditedCategoryResponse,
+    AddedCategoryResponse, DeletedCategoryResponse, DisplayedCategoryResponse, EditedCategoryResponse,
     GotAllCategoriesResponse,
-    GotCategoryDetailResponse
+    GotCategoryDetailResponse, RecoveredCategoryResponse
 } from "@/type/response/category.response.ts";
 import {AddCategoryRequest, EditCategoryRequest} from "@/type/request/category.request.ts";
 
@@ -30,7 +30,22 @@ const categoryApi= {
         });
     },
     editCategory: (id: number, body: EditCategoryRequest,thunkAPI: {signal :AbortSignal}) => {
-        return instance.post<SuccessApiResponse<EditedCategoryResponse>>(`/categories/${id}`, body, {
+        return instance.patch<SuccessApiResponse<EditedCategoryResponse>>(`/categories/${id}`, body, {
+            signal: thunkAPI.signal
+        });
+    },
+    deleteCategory: (id: number,thunkAPI: {signal :AbortSignal}) => {
+        return instance.delete<SuccessApiResponse<DeletedCategoryResponse>>(`/categories/${id}`, {
+            signal: thunkAPI.signal
+        });
+    },
+    recoverCategory: (id: number,thunkAPI: {signal :AbortSignal}) => {
+        return instance.patch<SuccessApiResponse<RecoveredCategoryResponse>>(`/categories/${id}/recovery`, {
+            signal: thunkAPI.signal
+        });
+    },
+    displayCategory: (id: number, isVisible: boolean,thunkAPI: {signal :AbortSignal}) => {
+        return instance.patch<SuccessApiResponse<DisplayedCategoryResponse>>(`/categories/${id}/visibility/${isVisible}`, {
             signal: thunkAPI.signal
         });
     }

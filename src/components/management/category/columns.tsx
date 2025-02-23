@@ -1,6 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table"
-// import {Checkbox} from "@/components/ui/checkbox.tsx";
+// import {Checkbox} from "@/components/ui/cHiểnheckbox.tsx";
 import {GotAllCategoriesResponse} from "@/type/response/category.response.ts";
+import { EyeIcon, EyeSlashIcon} from "@heroicons/react/24/outline";
 
 export const columns: ColumnDef<GotAllCategoriesResponse['items'][0]>[] = [
     // {
@@ -28,18 +29,27 @@ export const columns: ColumnDef<GotAllCategoriesResponse['items'][0]>[] = [
     //     enableHiding: false,
     // },
     {
-        id: "Mã danh mục sản phẩm",
+        id: "Mã",
         accessorKey: "id",
-        header: ({column}) => column.id
+        header: ({column}) => column.id,
+        cell: ({row}) => <span className={`${row.original.is_deleted && 'text-red-600 line-through'}`}>{row.original.id}</span>
     },
     {
-        id: "Tên danh mục sản phẩm",
+        id: "Tên",
         accessorKey: "name",
         header: ({column}) => column.id,
+        cell: ({row}) => <span className={`${row.original.is_deleted && 'text-red-600 line-through'}`}>{row.original.name}</span>
     },
     {
-        id: "Mô tả danh mục sản phẩm",
+        id: "Mô tả",
         accessorKey: "description",
         header: ({column}) => column.id,
+        cell: ({row}) => <span className={`${row.original.is_deleted && 'text-red-600 line-through'}`}>{row.original.description}</span>
+    },
+    {
+        id: "Hiển thị",
+        accessorKey: 'is_visible',
+        header: ({column}) => column.id,
+        cell: ({row}) => <>{row.original.is_visible ? <EyeIcon className="h-4 w-4" /> : <EyeSlashIcon className="h-4 w-4"/>}</>
     }
 ]

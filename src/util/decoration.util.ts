@@ -1,8 +1,12 @@
-export const formatCurrency = (value: number | undefined, locale = 'vi-VN', currency = 'VND'): string => {
-    return new Intl.NumberFormat(locale, {
-        style: 'currency',
-        currency: currency
-    }).format(value!);
+export const formatCurrency = (value: number | undefined, locale = 'vi-VN', currency = 'VND'): string | null => {
+    if (value != undefined) {
+        return new Intl.NumberFormat(locale, {
+            style: 'currency',
+            currency: currency
+        }).format(value);
+    }else {
+        return null;
+    }
 }
 
 export const rangePaging = (total: number | undefined) => {
@@ -19,4 +23,8 @@ export const formatPriceRangeTitle = (minPrice: number, maxPrice: number | null)
     }else if (minPrice != 0) {
         return `Trên ${formatCurrency(minPrice)}`;
     }
+}
+
+export const formatDisplayStatus = (isVisible: boolean) => {
+    return !isVisible ? "Hiện" : "Ẩn"
 }

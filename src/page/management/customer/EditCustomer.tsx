@@ -9,7 +9,7 @@ import {Calendar} from "@/components/ui/calendar.tsx";
 import {useForm} from "react-hook-form";
 import {EditCustomerRequest} from "@/type/request/user.request.ts";
 import {yupResolver} from "@hookform/resolvers/yup";
-import { editCustomerSchema} from "@/schema/auth-user.schema.ts";
+import {editCustomerSchema} from "@/schema/auth-account-user.schema.ts";
 import {useAppDispatch, useAppSelector} from "@/redux/hook.ts";
 import {editCustomer, getCustomerDetail, resetEditedCustomer} from "@/redux/slice/user.slice.ts";
 import {ChangeEvent, useEffect, useState} from "react";
@@ -19,7 +19,7 @@ import goongApi from "@/api/goong.api.ts";
 import {HttpStatusCode} from "axios";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select.tsx";
 import {availableGenders} from "@/constant/available.constant.ts";
-import {Separator} from "@/components/ui/separator.tsx";
+import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 
 const EditCustomer = () => {
     const dispatch = useAppDispatch();
@@ -40,8 +40,8 @@ const EditCustomer = () => {
         }
     }, [id])
 
-    useEffect(() =>{
-        if (editedCustomer){
+    useEffect(() => {
+        if (editedCustomer) {
             dispatch(resetEditedCustomer())
             navigate(`/customer-management`);
         }
@@ -67,7 +67,7 @@ const EditCustomer = () => {
     })
 
     const onSubmitEditCustomerForm = (body: EditCustomerRequest) => {
-        if (id){
+        if (id) {
             const promise = dispatch(editCustomer({customerId: Number(id), body: body}))
             return () => promise.abort()
         }
@@ -100,11 +100,14 @@ const EditCustomer = () => {
     };
 
     return (
-        <div className="grid gap-4 px-4">
-            <h2 className="text-2xl font-bold tracking-tighter">Chỉnh sửa thông tin khách hàng</h2>
-            <div>
-                <Form {...editCustomerForm}>
-                    <form onSubmit={editCustomerForm.handleSubmit(onSubmitEditCustomerForm)} className="space-y-6">
+        <Card className="grid gap-4 rounded-none border-none shadow-none">
+            <CardHeader className="px-5">
+                <CardTitle className="tracking-tighter text-green-600">Chỉnh sửa thông tin khách hàng</CardTitle>
+                <CardDescription>Nhập thông tin chỉnh sửa về khách hàng</CardDescription>
+            </CardHeader>
+            <Form {...editCustomerForm}>
+                <form onSubmit={editCustomerForm.handleSubmit(onSubmitEditCustomerForm)} className="space-y-6">
+                    <CardContent>
                         <div className="grid grid-cols-2 gap-6">
                             <FormField
                                 control={editCustomerForm.control}
@@ -230,9 +233,8 @@ const EditCustomer = () => {
                                                     return (
                                                         <FormItem
                                                             className="flex flex-col items-start col-span-2 flex-1">
-                                                            <FormLabel className="text-black">Địa
-                                                                chỉ {addressFieldsCount > 1 && i + 1} <span
-                                                                    className="text-red-600">*</span></FormLabel>
+                                                            <FormLabel>Địa
+                                                                chỉ {addressFieldsCount > 1 && i + 1}</FormLabel>
                                                             <FormControl>
                                                                 <div key={i} className="relative w-full">
                                                                     <Input
@@ -272,7 +274,6 @@ const EditCustomer = () => {
                                                                     }
                                                                 </div>
                                                             </FormControl>
-                                                            <FormMessage className="text-xs text-red-600"/>
                                                         </FormItem>
                                                     )
                                                 }}
@@ -323,27 +324,22 @@ const EditCustomer = () => {
                                 }
                             </div>
                         </div>
-                        <div className="flex justify-between">
-                            <Separator className="w-1/12" orientation="horizontal"/>
-                            <Separator className="w-1/12" orientation="horizontal"/>
-                        </div>
-                        <div className="flex justify-between">
-                            <Button type="button" variant="outline" className="border-dashed"
-                                    onClick={() => {
-                                        setAddressFieldsCount(addressFieldsCount + 1)
-                                        setOpenSelectionPlaceContents(new Array(addressFieldsCount + 1).fill(false))
-                                    }}>Thêm địa chỉ</Button>
-                            <div className="space-x-2">
-                                <Button variant="secondary" asChild className="hover:text-black">
-                                    <Link to="/customer-management">Hủy</Link>
-                                </Button>
-                                <Button type="submit">Lưu</Button>
-                            </div>
-                        </div>
-                    </form>
-                </Form>
-            </div>
-        </div>
+                    </CardContent>
+                    <CardFooter className="flex gap-2 justify-end">
+                        <Button type="button" variant="outline"
+                                className="border-dashed hover:border-green-600 hover:bg-green-50 hover:text-green-600"
+                                onClick={() => {
+                                    setAddressFieldsCount(addressFieldsCount + 1)
+                                    setOpenSelectionPlaceContents(new Array(addressFieldsCount + 1).fill(false))
+                                }}>Thêm địa chỉ</Button>
+                        <Button variant="secondary" asChild className="hover:text-black">
+                            <Link to="/customer-management">Hủy</Link>
+                        </Button>
+                        <Button type="submit" className="hover:bg-green-500 bg-green-600">Lưu</Button>
+                    </CardFooter>
+                </form>
+            </Form>
+        </Card>
     )
 }
 

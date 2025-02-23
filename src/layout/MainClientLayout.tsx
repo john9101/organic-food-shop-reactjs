@@ -8,7 +8,7 @@ const MainClientLayout = () => {
         <div>
             <Header/>
             <Outlet/>
-            <Toaster />
+            <Toaster richColors/>
             <Footer/>
         </div>
     )

@@ -1,13 +1,7 @@
 import * as React from "react"
-import {
-    AudioWaveform,
-    Command,
-    GalleryVerticalEnd,
-} from "lucide-react"
 
 import { NavMain } from "@/components/custom/nav-main"
 import { NavUser } from "@/components/custom/nav-user"
-import { TeamSwitcher } from "@/components/custom/team-switcher"
 import {
     Sidebar,
     SidebarContent,
@@ -15,101 +9,74 @@ import {
     SidebarHeader,
     SidebarRail,
 } from "@/components/ui/sidebar"
+import Logo from "@/components/common/Logo.tsx";
+import {useAppSelector} from "@/redux/hook.ts";
 
 const concept = {
-    user: {
-        name: "shadcn",
-        email: "m@example.com",
-        avatar: "/avatars/shadcn.jpg",
-    },
-    teams: [
-        {
-            name: "Acme Inc",
-            logo: GalleryVerticalEnd,
-            plan: "Enterprise",
-        },
-        {
-            name: "Acme Corp.",
-            logo: AudioWaveform,
-            plan: "Startup",
-        },
-        {
-            name: "Evil Corp.",
-            logo: Command,
-            plan: "Free",
-        },
-    ],
     navMain: [
         {
             title: "Tổng quan",
-            url: "#"
+            url: "/dashboard",
         },
         {
             title: "Khách hàng",
-            url: "#"
+            url: "/customer-management",
         },
         {
             title: "Nhân viên",
-            url: "#"
+            url: "/employee-management",
         },
         {
             title: "Sản phẩm",
-            url: "#",
-            isActive: true,
-            items: [
-                {
-                    title: "Danh sách sản phẩm",
-                    url: "#",
-                },
-                {
-                    title: "Danh sách danh mục sản phẩm",
-                    url: "#",
-                },
-                {
-                    title: "Danh sách bình luận sản phẩm",
-                    url: "#",
-                }
-            ],
+            url: "/product-management",
+        },
+        {
+            title: "Danh mục",
+            url: "/category-management",
+        },
+        {
+            title: "Thương hiệu",
+            url: "/brand-management",
         },
         {
             title: "Đơn hàng",
-            url: "#",
-            items: [
-                {
-                    title: "Danh sách đơn hàng",
-                    url: "#",
-                },
-                {
-                    title: "Danh sách đánh giá đơn hàng",
-                    url: "#",
-                }
-            ],
+            url: "/order-management",
         },
         {
-            title: "Mã khuyến mãi",
-            url: "#",
+            title: "Phiếu khuyến mãi",
+            url: "/voucher-management",
         },
     ],
     configs: [
         {
             title: "Phân quyền vai trò",
-            url: "#",
+            url: "/role-management",
         }
     ],
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const {authentication} = useAppSelector(state => state.authentication);
+    const loggedInAuth = authentication.loggedIn
+    const {account} = useAppSelector(state => state.account);
+    const gotAccountInfo = account.info.got
+
     return (
         <Sidebar {...props}>
-            <SidebarHeader>
-                <TeamSwitcher teams={concept.teams} />
+            <SidebarHeader className="py-6 place-content-start">
+                <Logo className="h-8 w-full"/>
             </SidebarHeader>
             <SidebarContent>
                 <NavMain heading="Quản lý" items={concept.navMain} />
                 <NavMain heading="Cấu hình" items={concept.configs} />
             </SidebarContent>
             <SidebarFooter>
-                <NavUser user={concept.user} />
+                {
+                    (loggedInAuth || gotAccountInfo) && <NavUser user={{
+                        email: gotAccountInfo?.email ? gotAccountInfo!.email : loggedInAuth!.metadata.email!,
+                        fullName: gotAccountInfo?.full_name ? gotAccountInfo!.full_name : loggedInAuth!.metadata.full_name
+                    }} />
+                }
             </SidebarFooter>
             <SidebarRail className="p-0"/>
         </Sidebar>

@@ -3,17 +3,11 @@ export type RegisteredResponse = {
     phone: string
 }
 
-export type IntrospectedOrLoggedInResponse = {
-    access_token?: string
-    user_info: {
+export type LoggedInResponse = {
+    access_token: string
+    metadata: {
         id: number,
         full_name: string
         email: string
-        avatar: string
-        phone?: string
-        age?: string
-        gender?: string
-        address?: string
-        dob?: Date
     }
 }

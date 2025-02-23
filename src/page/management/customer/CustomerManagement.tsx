@@ -64,8 +64,8 @@ const CustomerManagement = () => {
                                         <DropdownMenuItem asChild className="text-neutral-700">
                                             <Link to={`edit/${customer.id}`}>Chỉnh sửa</Link>
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleShowCustomerDelete(customer.id)}>Xóa</DropdownMenuItem>
                                         <DropdownMenuItem>Khóa</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleShowCustomerDelete(customer.id)}>Xóa</DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             )

@@ -2,6 +2,7 @@ import { ColumnDef } from "@tanstack/react-table"
 // import {Checkbox} from "@/components/ui/checkbox.tsx";
 import {GotAllProductsResponse} from "@/type/response/product.response.ts";
 import {formatCurrency} from "@/util/decoration.util.ts";
+import {EyeIcon, EyeSlashIcon} from "@heroicons/react/24/outline";
 
 export const columns: ColumnDef<GotAllProductsResponse['items'][0]>[] = [
     // {
@@ -29,14 +30,16 @@ export const columns: ColumnDef<GotAllProductsResponse['items'][0]>[] = [
     //     enableHiding: false,
     // },
     {
-        id: "Mã sản phẩm",
+        id: "Mã",
         accessorKey: "id",
-        header: ({column}) => column.id
+        header: ({column}) => column.id,
+        cell: ({row}) => <span className={`${row.original.is_deleted && 'text-red-600 line-through'}`}>{row.original.id}</span>
     },
     {
-        id: "Tiêu đề sản phẩm",
+        id: "Tiêu đề",
         accessorKey: "title",
         header: ({column}) => column.id,
+        cell: ({row}) => <span className={`${row.original.is_deleted && 'text-red-600 line-through'}`}>{row.original.title}</span>
     },
     {
         id: "Giá bán",
@@ -44,7 +47,17 @@ export const columns: ColumnDef<GotAllProductsResponse['items'][0]>[] = [
         header: ({column}) => column.id,
         cell: ({row}) => {
             const product = row.original
-            return (<>{formatCurrency(product.regular_price)}</>)
+            return (<span className={`${product.is_deleted && 'text-red-600 line-through'}`}>{formatCurrency(product.regular_price)}</span>)
+        },
+    },
+    {
+        id: "Phần trăm khuyến mãi",
+        accessorKey: "discount_percent",
+        header: ({column}) => column.id,
+        cell: ({row}) => {
+            const product = row.original
+            const discountPercent = product.discount_percent
+            return (<span className={`${product.is_deleted && 'text-red-600 line-through'}`}>{discountPercent && discountPercent + "%"}</span>)
         },
     },
     {
@@ -53,7 +66,13 @@ export const columns: ColumnDef<GotAllProductsResponse['items'][0]>[] = [
         header: ({column}) => column.id,
         cell: ({row}) => {
             const product = row.original
-            return (<>{product.discount_price ? formatCurrency(product.regular_price) : ''}</>)
+            return (<span className={`${product.is_deleted && 'text-red-600 line-through'}`}>{product.discount_price ? formatCurrency(product.regular_price) : ''}</span>)
         }
     },
+    {
+        id: "Hiển thị",
+        accessorKey: "is_visible",
+        header: ({column}) => column.id,
+        cell: ({row}) => <>{row.original.is_visible ? <EyeIcon className="h-4 w-4" /> : <EyeSlashIcon className="h-4 w-4"/>}</>
+    }
 ]

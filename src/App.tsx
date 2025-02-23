@@ -9,9 +9,9 @@ import Cart from "@/page/Cart";
 import PlaceOrder from "@/page/PlaceOrder.tsx";
 import {useAppDispatch, useAppSelector} from "@/redux/hook.ts";
 import {useEffect} from "react";
-import {introspect} from "@/redux/slice/account.slice.ts";
+import {getAccountInfo} from "@/redux/slice/account.slice.ts";
 import ProductDetail from "@/page/ProductDetail.tsx";
-import Profile from "@/page/Profile.tsx";
+import AccountInfo from "@/page/AccountInfo.tsx";
 import MainManagementLayout from "@/layout/MainManagementLayout.tsx";
 import Dashboard from "@/page/management/Dashboard.tsx";
 import CustomerManagement from "@/page/management/customer/CustomerManagement.tsx";
@@ -22,17 +22,41 @@ import AddProduct from "@/page/management/product/AddProduct.tsx";
 import EditProduct from "@/page/management/product/EditProduct.tsx";
 import ProductManagement from "@/page/management/product/ProductManagement.tsx";
 import CategoryManagement from "@/page/management/category/CategoryManagement.tsx";
+import EmployeeManagement from "@/page/management/employee/EmployeeManagement.tsx";
+import AddEmployee from "@/page/management/employee/AddEmployee.tsx";
+import EditEmployee from "@/page/management/employee/EditEmployee.tsx";
+import OrderManagement from "@/page/management/order/OrderManagement.tsx";
+import AddOrder from "@/page/management/order/AddOrder.tsx";
+import EditOrder from "@/page/management/order/EditOrder.tsx";
+import VoucherManagement from "@/page/management/voucher/VoucherManagement.tsx";
+import BrandManagement from "@/page/management/brand/BrandManagement.tsx";
+import {AccountManagementLayout} from "@/layout/AccountManagementLayout.tsx";
+import AccountAddress from "@/page/AccountAddress.tsx";
+import AccountChangePassword from "@/page/AccountChangePassword.tsx";
+import AccountOrder from "@/page/AccountOrder.tsx";
 
 function App() {
+    // const dispatch = useAppDispatch();
+    // const {isAuthenticated, userInfo} = useAppSelector(state => state.account);
+    //
+    //
+    // useEffect(() => {
+    //     if (window.location.pathname === "/login" || window.location.pathname === "/register") return;
+    //     if (!isAuthenticated && !userInfo) {
+    //         dispatch(introspect())
+    //     }
+    // }, [dispatch, isAuthenticated, userInfo]);
+
     const dispatch = useAppDispatch();
-    const {isAuthenticated, userInfo} = useAppSelector(state => state.account);
+    const {account} = useAppSelector(state => state.account);
+    const accountInfo = account.info.got
 
     useEffect(() => {
         if (window.location.pathname === "/login" || window.location.pathname === "/register") return;
-        if (!isAuthenticated && !userInfo) {
-            dispatch(introspect())
+        if (!accountInfo) {
+            dispatch(getAccountInfo())
         }
-    }, [dispatch, isAuthenticated, userInfo]);
+    }, [dispatch, accountInfo]);
 
     const router = createBrowserRouter([
         {
@@ -72,8 +96,26 @@ function App() {
                     element: <OrderResult/>
                 },
                 {
-                    path: 'profile',
-                    element: <Profile/>
+                    path: 'account/',
+                    element: <AccountManagementLayout/>,
+                    children: [
+                        {
+                            path: "info",
+                            element: <AccountInfo/>
+                        },
+                        {
+                            path: "address",
+                            element: <AccountAddress/>
+                        },
+                        {
+                            path: "change-password",
+                            element: <AccountChangePassword/>
+                        },
+                        {
+                            path: "order",
+                            element: <AccountOrder/>
+                        }
+                    ]
                 }
             ]
         },
@@ -103,6 +145,23 @@ function App() {
                     ]
                 },
                 {
+                    path: "employee-management",
+                    children: [
+                        {
+                            path: '',
+                            element: <EmployeeManagement/>
+                        },
+                        {
+                            path: "add",
+                            element: <AddEmployee/>
+                        },
+                        {
+                            path: "edit/:id",
+                            element: <EditEmployee/>
+                        }
+                    ]
+                },
+                {
                     path: "product-management",
                     children: [
                         {
@@ -127,9 +186,44 @@ function App() {
                             element: <CategoryManagement/>
                         }
                     ]
-                }
+                },
+                {
+                    path: "brand-management",
+                    children: [
+                        {
+                            path: '',
+                            element: <BrandManagement/>
+                        }
+                    ]
+                },
+                {
+                    path: "order-management",
+                    children: [
+                        {
+                            path: '',
+                            element: <OrderManagement/>
+                        },
+                        {
+                            path: "add",
+                            element: <AddOrder/>
+                        },
+                        {
+                            path: "edit/:id",
+                            element: <EditOrder/>
+                        }
+                    ]
+                },
+                {
+                    path: "voucher-management",
+                    children: [
+                        {
+                            path: '',
+                            element: <VoucherManagement/>
+                        }
+                    ]
+                },
             ]
-        }
+        },
     ]);
 
     return (

@@ -1,5 +1,5 @@
 import {Popover, Transition} from "@headlessui/react";
-import { ShoppingBagIcon} from "@heroicons/react/24/outline"
+import { ShoppingCartIcon} from "@heroicons/react/24/outline"
 import {Fragment, useEffect} from "react";
 import {useAppDispatch, useAppSelector} from "@/redux/hook.ts";
 import {getCartSummary} from "@/redux/slice/cart.slice.ts";
@@ -25,8 +25,8 @@ const CartDropDown = () => {
                 {({close}) => (
                     <>
                         <Popover.Button className="rounded-full right-0 p-0 flex items-center justify-center focus:outline-none relative">
-                            <span className="px-2 h-5 place-content-center bg-green-600 text-white absolute -top-2 left-4 rounded-full text-xs">{cartSummary?.total_count}</span>
-                            <ShoppingBagIcon className="w-8 h-8 text-black"/>
+                            <span className="px-2 h-5 place-content-center bg-green-600 text-white absolute -top-1 left-6 rounded-full text-xs">{cartSummary?.total_count}</span>
+                            <ShoppingCartIcon className="w-10 h-10 stroke-1"/>
                         </Popover.Button>
                         <Transition
                             as={Fragment}
@@ -44,18 +44,21 @@ const CartDropDown = () => {
                                             <>
                                                 <div key={index} className="grid grid-cols-4 gap-4">
                                                     <img src={item.product_thumbnail} className="h-16 w-16"/>
-                                                    <div className="grid col-span-3 text-base">
-                                                        <Link to="" className="font-semibold text-black hover:text-green-600 tracking-tighter">{item.product_title}</Link>
-                                                        <div className="grid grid-cols-2 col-span-4">
+                                                    <div>
+                                                        <Link to={`/products/${item.product_id}`} className="font-medium text-base text-black hover:text-green-600 tracking-tighter truncate space-y-1">{item.product_title}</Link>
+                                                        <Separator className="my-2"/>
+                                                        <div className="flex h-5 items-center space-x-2 text-sm">
                                                             <span>x{item.quantity}</span>
-                                                            <span className="text-right place-content-center">{formatCurrency(item.price)}</span>
+                                                            <Separator orientation="vertical"/>
+                                                            <span>{formatCurrency(item.price)}</span>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <Separator orientation="horizontal"/>
                                             </>
                                         ))}
-                                        <Button asChild className="text-lg py-6 hover:text-white hover:bg-green-600 font-medium tracking-tighter">
+                                        <Button asChild
+                                                className="text-lg py-6 hover:text-white hover:bg-green-600 font-medium tracking-tighter">
                                             <Link to="/cart" onClick={() => close()}>Xem giỏ hàng</Link>
                                         </Button>
                                     </div>

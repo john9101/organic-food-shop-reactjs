@@ -26,10 +26,10 @@ export function DataTableViewOptions<TData>({cols}: DataTableViewOptionsProps<TD
                     className="hidden lg:flex"
                 >
                     <Settings2 />
-                    Tùy chọn hiển thị
+                    Tùy chọn xem
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[150px]">
+            <DropdownMenuContent align="end" className="w-[200px]">
                 <DropdownMenuLabel>Danh sách các cột</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {

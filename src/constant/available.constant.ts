@@ -27,28 +27,28 @@ export const availablePaymentMethods = [
         description: "Nhận hàng tận tay, thanh toán liền ngay",
         iconText: "COD",
         iconImg: null,
-        value: "COD"
+        name: "COD"
     },
     {
         title: "Thanh toán qua ví điện tử VNPAY",
         description: "Quét mã VNPAY, thanh toán nhanh trong tích tắc",
         iconText: null,
         iconImg: "public/vnpay.png",
-        value: "VNPAY"
+        name: "VNPAY"
     },
     {
         title: "Thanh toán qua PayPal",
         description: "Thanh toán dễ dàng, an tâm cùng PayPal",
         iconText: null,
         iconImg: "public/paypal.png",
-        value: "PAYPAL"
+        name: "PAYPAL"
     },
     {
         title: "Thanh toán qua Stripe",
         description: "Thanh toán dễ dàng, an tâm cùng Stripe",
         iconText: null,
         iconImg: "public/stripe.png",
-        value: "STRIPE"
+        name: "STRIPE"
     },
 ]
 
@@ -79,5 +79,47 @@ export const availableGenders = [
     {
         title: 'Nữ',
         name: 'FEMALE'
+    }
+]
+
+export const availableTransactionStatuses = [
+    {
+        title: "Thành công",
+        name: "SUCCESSFUL"
+    },
+    {
+        title: "Chưa hoàn tất",
+        name: "INCOMPLETE"
+    },
+    {
+        title: "Thất bại",
+        name: "FAILED"
+    },
+]
+
+export const availableOrderStatuses = [
+    {
+        title: "Chờ duyệt",
+        name: "PENDING"
+    },
+    {
+        title: "Đã duyệt",
+        name: "APPROVED"
+    },
+    {
+        title: "Đang chuẩn bị",
+        name: "PREPARING"
+    },
+    {
+        title: "Đang giao",
+        name: "DELIVERING"
+    },
+    {
+        title: "Đã giao",
+        name: "DELIVERED"
+    },
+    {
+        title: "Bị hủy",
+        name: "CANCELED"
     }
 ]

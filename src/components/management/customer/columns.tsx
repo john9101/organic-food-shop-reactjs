@@ -1,6 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table"
 // import {Checkbox} from "@/components/ui/checkbox.tsx";
 import {GotAllCustomersResponse} from "@/type/response/user.response.ts";
+import {CheckIcon, XMarkIcon} from "@heroicons/react/24/outline";
 
 export const columns: ColumnDef<GotAllCustomersResponse['items'][0]>[] = [
     // {
@@ -28,7 +29,7 @@ export const columns: ColumnDef<GotAllCustomersResponse['items'][0]>[] = [
     //     enableHiding: false,
     // },
     {
-        id: "Mã khách hàng",
+        id: "Mã",
         accessorKey: "id",
         header: ({column}) => column.id
     },
@@ -51,5 +52,17 @@ export const columns: ColumnDef<GotAllCustomersResponse['items'][0]>[] = [
         id: "Ngày sinh",
         accessorKey: "dob",
         header: ({column}) => column.id,
+    },
+    {
+        id: "Tình trạng khóa",
+        accessorKey: "is_blocked",
+        header: ({column}) => column.id,
+        cell: ({row}) => <>{row.original.is_blocked ? <CheckIcon className="h-4 w-4" /> : <XMarkIcon className="h-4 w-4"/>}</>
+    },
+    {
+        id: "Tình trạng kích hoạt",
+        accessorKey: "is_activated",
+        header: ({column}) => column.id,
+        cell: ({row}) => <>{row.original.is_blocked ? <CheckIcon className="h-4 w-4" /> : <XMarkIcon className="h-4 w-4"/>}</>
     }
 ]

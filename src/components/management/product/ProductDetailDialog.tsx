@@ -13,6 +13,8 @@ import {useEffect} from "react";
 import {getProductDetail} from "@/redux/slice/product.slice.ts";
 import {useAppDispatch, useAppSelector} from "@/redux/hook.ts";
 import {availableMeasurementUnits} from "@/constant/available.constant.ts";
+import {formatCurrency} from "@/util/decoration.util.ts";
+import {Textarea} from "@/components/ui/textarea.tsx";
 
 interface ProductDetailDialogProps {
     open: boolean;
@@ -36,25 +38,25 @@ export const ProductDetailDialog = ({open, onOpenChange, id}: ProductDetailDialo
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-xl">
                 <DialogHeader>
-                    <DialogTitle>Chi tiết sản phẩm</DialogTitle>
+                    <DialogTitle className="text-green-600">Chi tiết sản phẩm</DialogTitle>
                     <DialogDescription>Thông tin chi tiết về sản phẩm</DialogDescription>
                 </DialogHeader>
                 <div className="grid grid-cols-2 gap-6">
                     <div className="flex flex-col space-y-1.5">
-                        <Label>Mã sản phẩm</Label>
+                        <Label>Mã</Label>
                         <Input disabled value={productDetail?.id}/>
                     </div>
                     <div className="flex flex-col space-y-1.5">
-                        <Label>Tên sản phẩm</Label>
-                        <Input disabled value={productDetail?.title}/>
+                        <Label>Tên</Label>
+                        <Input disabled value={productDetail?.name}/>
                     </div>
                     <div className="flex flex-col space-y-1.5">
                         <Label>Giá bán</Label>
-                        <Input disabled value={productDetail?.regular_price}/>
+                        <Input disabled value={formatCurrency(productDetail?.regular_price)!}/>
                     </div>
                     <div className="flex flex-col space-y-1.5">
                         <Label>Phần trăm khuyến mãi</Label>
-                        <Input disabled value={productDetail?.discount_percent}/>
+                        <Input disabled value={formatCurrency(productDetail?.discount_percent)!}/>
                     </div>
 
                     <div className="flex flex-col space-y-1.5">
@@ -69,7 +71,8 @@ export const ProductDetailDialog = ({open, onOpenChange, id}: ProductDetailDialo
 
                     <div className="flex flex-col space-y-1.5">
                         <Label>Đơn vị đo lường</Label>
-                        <Input disabled value={availableMeasurementUnits.find(measurementUnit=> measurementUnit.name === productDetail?.measurement_unit_mame)?.title}/>
+                        <Input disabled
+                               value={availableMeasurementUnits.find(measurementUnit => measurementUnit.name === productDetail?.measurement_unit_mame)?.title}/>
                     </div>
 
                     <div className="flex flex-col space-y-1.5">
@@ -79,12 +82,28 @@ export const ProductDetailDialog = ({open, onOpenChange, id}: ProductDetailDialo
 
                     <div className="flex flex-col col-span-2 space-y-1.5">
                         <Label>Mô tả ngắn gọn</Label>
-                        <Input disabled value={productDetail?.short_description}/>
+                        <Textarea disabled value={productDetail?.short_description}/>
                     </div>
 
                     <div className="flex flex-col col-span-2 space-y-1.5">
                         <Label>Mô tả chi tiết</Label>
-                        <Input disabled value={productDetail?.long_description}/>
+                        <Textarea disabled value={productDetail?.long_description}/>
+                    </div>
+
+                    <div className="flex flex-col col-span-2 space-y-1.5">
+                        <Label>Hình ảnh</Label>
+                        <div className="flex gap-2 flex-wrap">
+                            {
+                                productDetail?.images.map((image, index) => (
+                                    <img
+                                        key={index}
+                                        src={image.url}
+                                        alt={String(image.id)}
+                                        className="h-16 w-16 border border-dashed rounded-md"
+                                    />
+                                ))
+                            }
+                        </div>
                     </div>
                 </div>
                 <DialogFooter>

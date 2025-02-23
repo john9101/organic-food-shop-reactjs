@@ -35,7 +35,7 @@ const QuantityChanger = ({value, onChange, onPlus, onMinus}: ChangeQuantityButto
             <Button type="button" className="bg-transparent text-black px-4 h-auto focus:ring-0 hover:bg-transparent hover:text-green-700" onClick={onMinus}>
                 <MinusIcon/>
             </Button>
-            <Input type="text" className="bg-transparent font-semibold text-black px-0 h-auto focus:ring-0 focus:ring-offset-0 text-center border-none text-lg tracking-tighter" value={value || ""} onChange={handleChange} onBlur={handleBlur} />
+            <Input type="text" className="bg-transparent font-semibold text-black px-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0 text-center border-none !text-lg tracking-tighter" value={value || ""} onChange={handleChange} onBlur={handleBlur} />
             <Button type="button" className="bg-transparent text-black px-4 h-auto focus:ring-0 hover:bg-transparent hover:text-green-700" onClick={onPlus}>
                 <PlusIcon/>
             </Button>

@@ -16,7 +16,7 @@ import {yupResolver} from "@hookform/resolvers/yup";
 import { useNavigate } from 'react-router-dom';
 import Logo from "@/components/common/Logo.tsx";
 import {RegisterRequest} from "@/type/request/authentication.request.ts";
-import {registerSchema} from "@/schema/auth-user.schema.ts";
+import {registerSchema} from "@/schema/auth-account-user.schema.ts";
 import {useToast} from "@/hooks/use-toast.ts";
 import authenticationApi from "@/api/authentication.api.ts";
 import {ToastAction} from "@/components/ui/toast.tsx";
